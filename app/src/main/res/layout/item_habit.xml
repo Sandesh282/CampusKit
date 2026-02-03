@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Habit card with grid-based progress visualization (Reference 2 inspired) -->
+<!-- Simplified habit card with "Last 7 Days" circle layout (no complex grid) -->
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -17,90 +17,57 @@
         android:layout_height="wrap_content"
         android:padding="@dimen/spacing_standard">
 
-        <!-- Habit title and emoji/icon -->
-        <TextView
-            android:id="@+id/habitIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            tools:text="🏃"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
+        <!-- Habit title -->
         <TextView
             android:id="@+id/habitTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/spacing_tight"
             android:textSize="@dimen/text_body"
             android:textStyle="bold"
             android:textColor="@color/text_primary"
-            tools:text="Exercise regularly"
+            tools:text="🏃 Exercise regularly"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toEndOf="@id/habitIcon"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Subtitle/description -->
+        <!-- Frequency subtitle -->
         <TextView
-            android:id="@+id/habitSubtitle"
-            android:layout_width="0dp"
+            android:id="@+id/habitFrequency"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:layout_marginStart="@dimen/spacing_tight"
             android:textSize="@dimen/text_caption"
             android:textColor="@color/text_tertiary"
-            tools:text="Build routines that lead to success"
+            tools:text="Daily"
             app:layout_constraintTop_toBottomOf="@id/habitTitle"
-            app:layout_constraintStart_toEndOf="@id/habitIcon"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- Grid-based progress visualization (GitHub-style contribution grid) -->
-        <com.example.campuskit.ui.view.HabitProgressGridView
-            android:id="@+id/progressGrid"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_standard"
-            app:layout_constraintTop_toBottomOf="@id/habitSubtitle"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/statsContainer"
-            app:layout_constraintWidth_percent="0.6" />
-
-        <!-- Stats container (check-in progress, streak) -->
+        <!-- Last 7 Days circles (horizontal LinearLayout) -->
         <LinearLayout
-            android:id="@+id/statsContainer"
-            android:layout_width="0dp"
+            android:id="@+id/last7DaysContainer"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/spacing_standard"
             android:layout_marginTop="@dimen/spacing_standard"
-            android:orientation="vertical"
-            android:gravity="end"
-            app:layout_constraintTop_toBottomOf="@id/habitSubtitle"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/progressGrid">
-
-            <!-- Weekly progress dots -->
-            <LinearLayout
-                android:id="@+id/weeklyProgress"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="end">
-                
-                <!-- Dots added programmatically -->
-            </LinearLayout>
-
-            <!-- Current streak or stats -->
-            <TextView
-                android:id="@+id/statsText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_micro"
-                android:textSize="@dimen/text_caption"
-                android:textColor="@color/text_tertiary"
-                android:gravity="end"
-                tools:text="5 day streak" />
-
+            android:orientation="horizontal"
+            android:gravity="start"
+            app:layout_constraintTop_toBottomOf="@id/habitFrequency"
+            app:layout_constraintStart_toStartOf="parent">
+            
+            <!-- 7 circles will be added programmatically -->
+            
         </LinearLayout>
+
+        <!-- Streak/stats text -->
+        <TextView
+            android:id="@+id/statsText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_micro"
+            android:textSize="@dimen/text_caption"
+            android:textColor="@color/text_tertiary"
+            tools:text="5 day streak 🔥"
+            app:layout_constraintTop_toBottomOf="@id/last7DaysContainer"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <!-- Check-in button -->
         <com.google.android.material.button.MaterialButton
@@ -113,7 +80,7 @@
             android:textSize="@dimen/text_body_small"
             app:cornerRadius="@dimen/corner_pill_small"
             app:backgroundTint="@color/accent_sage"
-            app:layout_constraintTop_toBottomOf="@id/progressGrid"
+            app:layout_constraintTop_toBottomOf="@id/statsText"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 

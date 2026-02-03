@@ -1,32 +1,24 @@
 package com.example.campuskit.ui
 
-import android.app.AlertDialog
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.campuskit.R
-import com.example.campuskit.TaskDetailActivity
-import com.example.campuskit.data.TaskRepository
+import com.example.campuskit.data.CampusKitRepository
 import com.example.campuskit.databinding.FragmentTasksBinding
+import com.example.campuskit.ui.adapter.HabitAdapter
+import kotlinx.coroutines.launch
 
 class TasksFragment : Fragment() {
     
     private var _binding: FragmentTasksBinding? = null
     private val binding get() = _binding!!
-    private lateinit var taskRepository: TaskRepository
-    
-    // Sample habit data
-    private val sampleHabits = listOf(
-        "🏃 Exercise regularly",
-        "📚 Read books",
-        "💧 Drink more water",
-        "🧘 Meditate daily"
-    )
+    private lateinit var repository: CampusKitRepository
+    private lateinit var habitAdapter: HabitAdapter
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,13 +32,9 @@ class TasksFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        taskRepository = TaskRepository.getInstance(requireContext())
+        repository = CampusKitRepository.getInstance(requireContext())
         
-        // Set stats
-        binding.totalHabitsCount.text = sampleHabits.size.toString()
-        binding.completedTodayCount.text = "0"
-        
-        // Setup RecyclerView with habit cards (simplified for now)
+        // Setup RecyclerView
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
         
         // Create New Habit button
@@ -54,14 +42,42 @@ class TasksFragment : Fragment() {
             Toast.makeText(requireContext(), "Create New Habit (coming soon)", Toast.LENGTH_SHORT).show()
         }
         
-        // For now, just show message in recycler view
-        // In full implementation, this would use a HabitAdapter with item_habit.xml
-        Toast.makeText(requireContext(), "Habits UI loaded - grid visualization requires data", Toast.LENGTH_SHORT).show()
+        loadHabits()
+    }
+    
+    private fun loadHabits() {
+        lifecycleScope.launch {
+            val habits = repository.getAllHabits()
+            
+            // Fetch logs for all habits (last 7 days)
+            val logsMap = mutableMapOf<Long, List<com.example.campuskit.data.HabitLogEntity>>()
+            for (habit in habits) {
+                logsMap[habit.id] = repository.getHabitLogsForLastDays(habit.id, 7)
+            }
+            
+            // Update stats
+            binding.totalHabitsCount.text = habits.size.toString()
+            
+            // Create adapter with check-in callback
+            habitAdapter = HabitAdapter(
+                onCheckIn = { habit ->
+                    lifecycleScope.launch {
+                        repository.checkInHabit(habit.id)
+                        loadHabits() // Reload to update UI
+                        Toast.makeText(requireContext(), "Checked in!", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                habitLogsMap = logsMap
+            )
+            
+            binding.recyclerView.adapter = habitAdapter
+            habitAdapter.submitList(habits)
+        }
     }
     
     override fun onResume() {
         super.onResume()
-        // Reload habits data when fragment resumes
+        loadHabits()
     }
     
     override fun onDestroyView() {

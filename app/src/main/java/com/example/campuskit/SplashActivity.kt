@@ -5,17 +5,24 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
+import com.example.campuskit.databinding.ActivitySplashBinding
 
+/**
+ * Minimal splash screen with 800ms delay per spec
+ */
 class SplashActivity : AppCompatActivity() {
+    
+    private lateinit var binding: ActivitySplashBinding
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        binding = ActivitySplashBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         
-        // Delay navigation to MainActivity
+        // 800ms delay per spec
         Handler(Looper.getMainLooper()).postDelayed({
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, MainActivity::class.java))
             finish()
-        }, 1000) // 1000ms delay
+        }, 800)
     }
 }
