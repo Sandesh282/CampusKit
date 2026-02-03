@@ -1,66 +1,108 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Timeline-inspired task card with leading visual marker and time anchoring -->
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    app:cardElevation="4dp"
-    app:cardCornerRadius="12dp">
+    android:layout_marginHorizontal="0dp"
+    android:layout_marginVertical="@dimen/spacing_micro"
+    app:cardCornerRadius="@dimen/corner_card"
+    app:cardElevation="@dimen/elevation_card"
+    app:cardBackgroundColor="@color/surface_dark"
+    app:strokeWidth="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="12dp">
+        android:padding="@dimen/spacing_standard">
 
+        <!-- Leading colored visual marker (block) -->
+        <View
+            android:id="@+id/taskColorMarker"
+            android:layout_width="4dp"
+            android:layout_height="0dp"
+            android:layout_marginEnd="@dimen/spacing_tight"
+            android:background="@color/accent_sage"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- Time range - subtle secondary text (upper left) -->
+        <TextView
+            android:id="@+id/taskTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_tight"
+            android:textSize="@dimen/text_caption"
+            android:textColor="@color/text_tertiary"
+            tools:text="08:00"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/taskColorMarker" />
+
+        <!-- Task title -->
         <TextView
             android:id="@+id/taskTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
+            android:layout_marginStart="@dimen/spacing_tight"
+            android:textSize="@dimen/text_body"
             android:textStyle="bold"
-            tools:text="Sample Task Title"
+            android:textColor="@color/text_primary"
+            tools:text="Morning Routine"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/priorityText" />
+            app:layout_constraintStart_toEndOf="@id/taskColorMarker"
+            app:layout_constraintEnd_toStartOf="@id/statusIndicator" />
 
-        <TextView
-            android:id="@+id/priorityText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="4dp"
-            tools:text="HIGH"
+        <!-- Status indicator (circular, right side) -->
+        <View
+            android:id="@+id/statusIndicator"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:background="@drawable/date_pill_unselected"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
+        <!-- Task description -->
         <TextView
             android:id="@+id/taskDescription"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:textSize="14sp"
-            android:textColor="?android:attr/textColorSecondary"
+            android:layout_marginTop="@dimen/spacing_micro"
+            android:layout_marginStart="@dimen/spacing_tight"
+            android:textSize="@dimen/text_body_small"
+            android:textColor="@color/text_secondary"
             android:maxLines="2"
             android:ellipsize="end"
-            tools:text="Task description goes here"
+            tools:text="Complete morning exercises and meditation"
             app:layout_constraintTop_toBottomOf="@id/taskTitle"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/taskColorMarker"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <ImageView
-            android:id="@+id/reminderIcon"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:layout_marginTop="12dp"
-            android:src="@android:drawable/ic_menu_recent_history"
-            android:contentDescription="Reminder set"
+        <!-- Metadata (optional - for habit tracking) -->
+        <LinearLayout
+            android:id="@+id/metadataLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_micro"
+            android:layout_marginStart="@dimen/spacing_tight"
+            android:orientation="horizontal"
             android:visibility="gone"
+            tools:visibility="visible"
             app:layout_constraintTop_toBottomOf="@id/taskDescription"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toEndOf="@id/taskColorMarker">
+
+            <TextView
+                android:id="@+id/metadataLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/text_caption"
+                android:textColor="@color/text_tertiary"
+                tools:text="0/3 completed" />
+
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

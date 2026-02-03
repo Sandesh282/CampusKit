@@ -13,14 +13,20 @@ import com.example.campuskit.R
 import com.example.campuskit.TaskDetailActivity
 import com.example.campuskit.data.TaskRepository
 import com.example.campuskit.databinding.FragmentTasksBinding
-import com.example.campuskit.ui.adapter.TaskAdapter
 
 class TasksFragment : Fragment() {
     
     private var _binding: FragmentTasksBinding? = null
     private val binding get() = _binding!!
     private lateinit var taskRepository: TaskRepository
-    private lateinit var taskAdapter: TaskAdapter
+    
+    // Sample habit data
+    private val sampleHabits = listOf(
+        "🏃 Exercise regularly",
+        "📚 Read books",
+        "💧 Drink more water",
+        "🧘 Meditate daily"
+    )
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -36,46 +42,26 @@ class TasksFragment : Fragment() {
         
         taskRepository = TaskRepository.getInstance(requireContext())
         
-        taskAdapter = TaskAdapter(
-            onTaskClick = { task ->
-                // Open TaskDetailActivity on click
-                val intent = Intent(requireContext(), TaskDetailActivity::class.java)
-                intent.putExtra("task_id", task.id)
-                startActivity(intent)
-            },
-            onTaskLongPress = { task ->
-                // Show delete dialog on long press
-                showDeleteDialog(task)
-            }
-        )
+        // Set stats
+        binding.totalHabitsCount.text = sampleHabits.size.toString()
+        binding.completedTodayCount.text = "0"
         
+        // Setup RecyclerView with habit cards (simplified for now)
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        binding.recyclerView.adapter = taskAdapter
         
-        loadTasks()
+        // Create New Habit button
+        binding.createHabitButton.setOnClickListener {
+            Toast.makeText(requireContext(), "Create New Habit (coming soon)", Toast.LENGTH_SHORT).show()
+        }
+        
+        // For now, just show message in recycler view
+        // In full implementation, this would use a HabitAdapter with item_habit.xml
+        Toast.makeText(requireContext(), "Habits UI loaded - grid visualization requires data", Toast.LENGTH_SHORT).show()
     }
     
     override fun onResume() {
         super.onResume()
-        loadTasks()
-    }
-    
-    private fun loadTasks() {
-        val tasks = taskRepository.getAllTasks()
-        taskAdapter.submitList(tasks)
-    }
-    
-    private fun showDeleteDialog(task: com.example.campuskit.data.Task) {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Delete Task")
-            .setMessage("Are you sure you want to delete '${task.title}'?")
-            .setPositiveButton("Delete") { _, _ ->
-                taskRepository.deleteTask(task.id)
-                loadTasks()
-                Toast.makeText(requireContext(), "Task deleted", Toast.LENGTH_SHORT).show()
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
+        // Reload habits data when fragment resumes
     }
     
     override fun onDestroyView() {

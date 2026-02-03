@@ -1,6 +1,7 @@
 package com.example.campuskit.ui.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -34,21 +35,38 @@ class TaskAdapter(
             binding.taskTitle.text = task.title
             binding.taskDescription.text = task.description
             
-            // Set priority text
-            val priorityText = when (task.priority) {
-                0 -> "LOW"
-                1 -> "MEDIUM"
-                2 -> "HIGH"
-                else -> "UNKNOWN"
+            // Set color marker based on task priority/category
+            val markerColorRes = when (task.priority) {
+                0 -> com.example.campuskit.R.color.accent_sage      // Low priority - sage green
+                1 -> com.example.campuskit.R.color.accent_blue      // Medium - blue
+                2 -> com.example.campuskit.R.color.accent_coral     // High - coral
+                else -> com.example.campuskit.R.color.accent_sage
             }
-            binding.priorityText.text = priorityText
+            binding.taskColorMarker.setBackgroundResource(markerColorRes)
             
-            // Show reminder icon if reminder is set
-            binding.reminderIcon.visibility = if (task.hasReminder && task.reminderTime != null) {
-                ViewGroup.VISIBLE
+            // Show time if task has reminder (subtle, timeline-anchored)
+            if (task.hasReminder && task.reminderTime != null) {
+                binding.taskTime.visibility = View.VISIBLE
+                // Format time from reminderTime (assuming it's a timestamp)
+                val calendar = java.util.Calendar.getInstance()
+                calendar.timeInMillis = task.reminderTime!!
+                val timeFormat = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+                binding.taskTime.text = timeFormat.format(calendar.time)
             } else {
-                ViewGroup.GONE
+                binding.taskTime.visibility = View.GONE
             }
+            
+            // Status indicator color (subtle tone-based communication)
+            val statusColorRes = when {
+                task.hasReminder && task.reminderTime != null -> 
+                    com.example.campuskit.R.color.status_in_progress
+                else -> 
+                    com.example.campuskit.R.color.status_pending
+            }
+            binding.statusIndicator.setBackgroundResource(statusColorRes)
+            
+            // Hide metadata layout for now (reserved for habit progress)
+            binding.metadataLayout.visibility = View.GONE
             
             // Set click listeners
             binding.root.setOnClickListener {

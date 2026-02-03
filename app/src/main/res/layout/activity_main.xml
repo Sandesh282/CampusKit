@@ -15,14 +15,18 @@
             android:id="@+id/appBarLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/background_dark"
             app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
+                android:background="@color/background_dark"
+                android:theme="@style/ThemeOverlay.Material3.Dark.ActionBar"
                 app:navigationIcon="@android:drawable/ic_menu_more"
-                app:title="@string/app_name" />
+                app:title="@string/app_name"
+                app:titleTextColor="@color/text_primary" />
         </com.google.android.material.appbar.AppBarLayout>
 
         <androidx.fragment.app.FragmentContainerView
@@ -38,6 +42,10 @@
             android:id="@+id/bottomNavigation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/surface_dark"
+            android:theme="@style/ThemeOverlay.Material3.Dark"
+            app:itemIconTint="@color/accent_primary"
+            app:itemTextColor="@color/text_secondary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:menu="@menu/bottom_navigation" />
 
@@ -48,6 +56,10 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
+        android:background="@color/surface_dark"
+        android:theme="@style/ThemeOverlay.Material3.Dark"
+        app:itemTextColor="@color/text_primary"
+        app:itemIconTint="@color/text_secondary"
         app:menu="@menu/drawer_menu" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

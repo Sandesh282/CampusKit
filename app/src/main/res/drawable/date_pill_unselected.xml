@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Date pill view - circular/pill shape for date selector -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    
+    <solid android:color="@color/surface_elevated" />
+    
+    <size
+        android:width="@dimen/date_pill_small"
+        android:height="@dimen/date_pill_small" />
+</shape>
