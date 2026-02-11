@@ -1,34 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Base colors -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    
-    <!-- Deep dark charcoal theme - base surfaces -->
-    <color name="background_dark">#FF1C1C1E</color>
-    <color name="surface_dark">#FF2C2C2E</color>
-    <color name="surface_elevated">#FF3A3A3C</color>
-    <color name="surface_variant">#FF48484A</color>
-    
-    <!-- Text colors - hierarchy through opacity -->
-    <color name="text_primary">#FFFFFFFF</color>
-    <color name="text_secondary">#B3FFFFFF</color>
-    <color name="text_tertiary">#80FFFFFF</color>
-    <color name="text_disabled">#4DFFFFFF</color>
-    
-    <!-- Muted pastel accents - intentional and calm -->
-    <color name="accent_coral">#FFAA9A8C</color>
-    <color name="accent_sage">#FFA8C99C</color>
-    <color name="accent_blue">#FF7C9BC4</color>
-    
-    <!-- Semantic colors derived from muted palette -->
-    <color name="accent_primary">#FFAA9A8C</color>
-    <color name="accent_secondary">#FFA8C99C</color>
-    <color name="accent_tertiary">#FF7C9BC4</color>
-    
-    <!-- Status colors - muted for calm aesthetic -->
-    <color name="status_complete">#FFA8C99C</color>
-    <color name="status_in_progress">#FF7C9BC4</color>
-    <color name="status_pending">#FFAA9A8C</color>
-    <color name="status_overdue">#FFD49B9B</color>
 </resources>

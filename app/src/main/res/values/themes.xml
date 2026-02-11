@@ -1,56 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme - Deep dark charcoal, calm and intentional -->
-    <style name="Base.Theme.CampusKit" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Primary branding colors - muted pastels -->
-        <item name="colorPrimary">@color/accent_primary</item>
-        <item name="colorPrimaryVariant">@color/accent_secondary</item>
-        <item name="colorOnPrimary">@color/text_primary</item>
-        <item name="colorSecondary">@color/accent_secondary</item>
-        <item name="colorTertiary">@color/accent_tertiary</item>
-        
-        <!-- Surface and background - deep dark charcoal base -->
-        <item name="android:colorBackground">@color/background_dark</item>
-        <item name="colorSurface">@color/surface_dark</item>
-        <item name="colorSurfaceVariant">@color/surface_elevated</item>
-        <item name="colorOnSurface">@color/text_primary</item>
-        <item name="colorOnSurfaceVariant">@color/text_secondary</item>
-        
-        <!-- System bars -->
-        <item name="android:statusBarColor">@color/background_dark</item>
-        <item name="android:navigationBarColor">@color/background_dark</item>
+    <style name="Theme.CampusKit" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:colorBackground">#FF000000</item>
+        <item name="colorSurface">#FF000000</item>
+        <item name="android:statusBarColor">#FF000000</item>
+        <item name="android:navigationBarColor">#FF000000</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar">false</item>
-        
-        <!-- Material3 shape system - nuanced corners -->
-        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.CampusKit.SmallComponent</item>
-        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.CampusKit.MediumComponent</item>
-        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.CampusKit.LargeComponent</item>
-        
-        <!-- Animation durations - 150-250ms standard -->
-        <item name="motionDurationShort1">150</item>
-        <item name="motionDurationShort2">200</item>
-        <item name="motionDurationMedium1">250</item>
-        
-        <!-- Easing - fast out, slow in -->
-        <item name="motionEasingStandard">@android:interpolator/fast_out_slow_in</item>
     </style>
-    
-    <!-- Shape appearances for consistent corner radii -->
-    <style name="ShapeAppearance.CampusKit.SmallComponent" parent="ShapeAppearance.Material3.SmallComponent">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">@dimen/corner_subtle</item>
-    </style>
-    
-    <style name="ShapeAppearance.CampusKit.MediumComponent" parent="ShapeAppearance.Material3.MediumComponent">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">@dimen/corner_card</item>
-    </style>
-    
-    <style name="ShapeAppearance.CampusKit.LargeComponent" parent="ShapeAppearance.Material3.LargeComponent">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">@dimen/corner_pill</item>
-    </style>
-
-    <style name="Theme.CampusKit" parent="Base.Theme.CampusKit" />
 </resources>
