@@ -1,15 +1,26 @@
 package com.example.campuskit.ui.events
 
 import androidx.lifecycle.ViewModel
-import com.example.campuskit.data.events.MockEvents
+import androidx.lifecycle.viewModelScope
+import com.example.campuskit.domain.events.FilterEventsUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
-class EventsViewModel : ViewModel() {
+@HiltViewModel
+class EventsViewModel @Inject constructor(
+    private val filterEventsUseCase: FilterEventsUseCase
+) : ViewModel() {
 
-    private val _events = MutableStateFlow(MockEvents.getEvents())
-    val events: StateFlow<List<com.example.campuskit.data.events.Event>> = _events.asStateFlow()
+    val events = filterEventsUseCase().stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        emptyList(),
+    )
 
     private val _remindedEvents = MutableStateFlow<Set<String>>(emptySet())
     val remindedEvents: StateFlow<Set<String>> = _remindedEvents.asStateFlow()

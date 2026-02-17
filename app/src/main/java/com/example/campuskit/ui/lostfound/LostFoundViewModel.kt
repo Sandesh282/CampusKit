@@ -1,18 +1,27 @@
 package com.example.campuskit.ui.lostfound
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.campuskit.data.lostfound.LostFoundItem
-import com.example.campuskit.data.lostfound.MockLostFound
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.example.campuskit.data.lostfound.LostFoundRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
-class LostFoundViewModel : ViewModel() {
+@HiltViewModel
+class LostFoundViewModel @Inject constructor(
+    private val repository: LostFoundRepository
+) : ViewModel() {
 
-    private val _items = MutableStateFlow(MockLostFound.getItems())
-    val items: StateFlow<List<LostFoundItem>> = _items.asStateFlow()
+    val items: StateFlow<List<LostFoundItem>> = repository.getItems().stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        emptyList()
+    )
 
     fun addItem(item: LostFoundItem) {
-        _items.value = listOf(item) + _items.value
+        repository.addItem(item)
     }
 }

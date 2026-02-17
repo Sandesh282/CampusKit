@@ -105,7 +105,7 @@ fun MessScreen(viewModel: MessViewModel = viewModel()) {
 
             // Yuck alert banner
             val yuckNames = yuckItems.map { it.itemName }
-            val allMeals = todayMenu.breakfast + todayMenu.lunch + todayMenu.dinner
+            val allMeals = todayMenu.breakfast + todayMenu.lunch + todayMenu.snacks + todayMenu.dinner
             val detectedYuck = allMeals.filter { meal ->
                 yuckNames.any { yuck -> meal.contains(yuck, ignoreCase = true) }
             }
@@ -159,6 +159,14 @@ fun MessScreen(viewModel: MessViewModel = viewModel()) {
                 MealCard(
                     title = "☀️  Lunch",
                     items = todayMenu.lunch,
+                    yuckItems = yuckItems.map { it.itemName },
+                    viewModel = viewModel,
+                )
+            }
+            item {
+                MealCard(
+                    title = "☕  Snacks",
+                    items = todayMenu.snacks,
                     yuckItems = yuckItems.map { it.itemName },
                     viewModel = viewModel,
                 )
@@ -291,6 +299,15 @@ fun MessScreen(viewModel: MessViewModel = viewModel()) {
                         MealCard(
                             title = "Lunch",
                             items = dayMenu.lunch,
+                            yuckItems = yuckItems.map { it.itemName },
+                            viewModel = viewModel,
+                            compact = true,
+                        )
+                    }
+                    item {
+                        MealCard(
+                            title = "Snacks",
+                            items = dayMenu.snacks,
                             yuckItems = yuckItems.map { it.itemName },
                             viewModel = viewModel,
                             compact = true,

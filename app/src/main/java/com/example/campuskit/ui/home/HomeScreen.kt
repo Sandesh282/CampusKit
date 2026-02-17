@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.campuskit.data.attendance.AttendanceEntity
+import com.example.campuskit.domain.attendance.AttendanceStatus
 import com.example.campuskit.ui.theme.AccentBlue
 import com.example.campuskit.ui.theme.AttendanceCritical
 import com.example.campuskit.ui.theme.AttendanceSafe
@@ -116,6 +117,7 @@ fun HomeScreen(viewModel: AttendanceViewModel = viewModel()) {
             items(subjects, key = { it.subjectId }) { subject ->
                 AttendanceCard(
                     subject = subject,
+                    viewModel = viewModel,
                     onAttend = { viewModel.markAttended(subject.subjectId) },
                     onBunk = { viewModel.markBunked(subject.subjectId) },
                     onDelete = { viewModel.deleteSubject(subject) },
@@ -168,12 +170,13 @@ private fun EmptyState() {
 @Composable
 fun AttendanceCard(
     subject: AttendanceEntity,
+    viewModel: AttendanceViewModel,
     onAttend: () -> Unit,
     onBunk: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    val percentage = AttendanceViewModel.calculatePercentage(subject.attendedClasses, subject.totalClasses)
-    val status = AttendanceViewModel.getStatus(subject.attendedClasses, subject.totalClasses, subject.minimumPercentage)
+    val status = viewModel.getAttendanceStatus(subject.attendedClasses, subject.totalClasses, subject.minimumPercentage)
+    val percentage = if (subject.totalClasses == 0) 100f else (subject.attendedClasses.toFloat() / subject.totalClasses.toFloat()) * 100f
 
     val statusColor by animateColorAsState(
         targetValue = when (status) {
