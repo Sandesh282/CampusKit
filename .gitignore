@@ -50,3 +50,5 @@ fastlane/test_output
 tmp/
 out/
 zlslsl
+crash_log.txt
+crash_log2.txt

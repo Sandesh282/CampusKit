@@ -52,7 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.campuskit.data.attendance.AttendanceEntity
 import com.example.campuskit.domain.attendance.AttendanceStatus
 import com.example.campuskit.ui.theme.AccentBlue
@@ -68,7 +68,7 @@ import com.example.campuskit.ui.theme.TextSecondary
 import com.example.campuskit.ui.theme.TextTertiary
 
 @Composable
-fun HomeScreen(viewModel: AttendanceViewModel = viewModel()) {
+fun HomeScreen(viewModel: AttendanceViewModel = hiltViewModel()) {
     val subjects by viewModel.subjects.collectAsState()
     var showAddDialog by remember { mutableStateOf(false) }
 

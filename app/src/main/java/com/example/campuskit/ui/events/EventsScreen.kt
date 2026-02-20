@@ -38,7 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.campuskit.data.events.Event
 import com.example.campuskit.ui.theme.AccentBlue
 import com.example.campuskit.ui.theme.AccentPurple
@@ -52,7 +52,7 @@ import com.example.campuskit.ui.theme.TextSecondary
 import com.example.campuskit.ui.theme.TextTertiary
 
 @Composable
-fun EventsScreen(viewModel: EventsViewModel = viewModel()) {
+fun EventsScreen(viewModel: EventsViewModel = hiltViewModel()) {
     val events by viewModel.events.collectAsState()
     val remindedEvents by viewModel.remindedEvents.collectAsState()
 

@@ -18,13 +18,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.campuskit.ui.theme.AccentBlue
 import com.example.campuskit.ui.theme.Black
 import com.example.campuskit.ui.theme.TextPrimary
 
 @Composable
-fun CalendarScreen(viewModel: CalendarViewModel = viewModel()) {
+fun CalendarScreen(viewModel: CalendarViewModel = hiltViewModel()) {
     val calendarMode by viewModel.calendarMode.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {

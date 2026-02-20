@@ -7,6 +7,9 @@ import androidx.activity.enableEdgeToEdge
 import com.example.campuskit.ui.navigation.MainNavigation
 import com.example.campuskit.ui.theme.CampusKitTheme
 
+import dagger.hilt.android.AndroidEntryPoint
+
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -48,7 +48,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.campuskit.data.lostfound.LostFoundItem
 import com.example.campuskit.ui.theme.AccentBlue
 import com.example.campuskit.ui.theme.AccentPurple
@@ -64,7 +64,7 @@ import com.example.campuskit.ui.theme.TextSecondary
 import com.example.campuskit.ui.theme.TextTertiary
 
 @Composable
-fun LostFoundScreen(viewModel: LostFoundViewModel = viewModel()) {
+fun LostFoundScreen(viewModel: LostFoundViewModel = hiltViewModel()) {
     val items by viewModel.items.collectAsState()
     var showPostDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current

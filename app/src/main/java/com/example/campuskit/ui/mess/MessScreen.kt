@@ -51,7 +51,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.campuskit.ui.theme.AccentBlue
 import com.example.campuskit.ui.theme.AccentTeal
 import com.example.campuskit.ui.theme.Black
@@ -69,7 +69,7 @@ import java.util.Locale
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun MessScreen(viewModel: MessViewModel = viewModel()) {
+fun MessScreen(viewModel: MessViewModel = hiltViewModel()) {
     val todayMenu by viewModel.todayMenu.collectAsState()
     val yuckItems by viewModel.yuckItems.collectAsState()
     var showYuckDialog by remember { mutableStateOf(false) }
