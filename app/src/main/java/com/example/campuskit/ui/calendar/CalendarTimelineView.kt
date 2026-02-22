@@ -28,6 +28,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -66,9 +67,12 @@ import java.util.Locale
 private const val DAYS_RANGE = 365
 
 @Composable
-fun CalendarTimelineView(viewModel: CalendarViewModel) {
+fun CalendarTimelineView(
+    viewModel: CalendarViewModel,
+    onAddEventClick: () -> Unit = {}
+) {
     val selectedDate by viewModel.selectedDate.collectAsState()
-    val allEvents = viewModel.events
+    val allEvents by viewModel.events.collectAsState()
 
     // ±365 days for date strip
     val today = remember { LocalDate.now() }
@@ -196,10 +200,10 @@ fun CalendarTimelineView(viewModel: CalendarViewModel) {
 
             Spacer(modifier = Modifier.weight(1f))
 
-            IconButton(onClick = { }) {
+            IconButton(onClick = onAddEventClick) {
                 Icon(
-                    Icons.Filled.MoreVert,
-                    contentDescription = "More options",
+                    Icons.Filled.Add,
+                    contentDescription = "Add Event",
                     tint = TextPrimary,
                 )
             }

@@ -14,7 +14,7 @@ enum class CalendarMode { GRID, TIMELINE }
 
 class CalendarViewModel : ViewModel() {
 
-    private val allEvents = MockCalendarData.getEvents()
+    private val _allEvents = MutableStateFlow(MockCalendarData.getEvents())
     private val allCourses = MockCalendarData.getCourses()
 
     private val _selectedDate = MutableStateFlow(LocalDate.now())
@@ -29,7 +29,7 @@ class CalendarViewModel : ViewModel() {
     private val _eventsForSelectedDate = MutableStateFlow<List<CalendarEvent>>(emptyList())
     val eventsForSelectedDate: StateFlow<List<CalendarEvent>> = _eventsForSelectedDate.asStateFlow()
 
-    val events: List<CalendarEvent> get() = allEvents
+    val events: StateFlow<List<CalendarEvent>> = _allEvents.asStateFlow()
     val courses: List<CourseInfo> get() = allCourses
 
     init {
@@ -54,6 +54,11 @@ class CalendarViewModel : ViewModel() {
     }
 
     private fun updateEventsForDate(date: LocalDate) {
-        _eventsForSelectedDate.value = allEvents.filter { it.date == date }.sortedBy { it.startTime }
+        _eventsForSelectedDate.value = _allEvents.value.filter { it.date == date }.sortedBy { it.startTime }
+    }
+
+    fun addEvent(event: CalendarEvent) {
+        _allEvents.value = _allEvents.value + event
+        updateEventsForDate(_selectedDate.value)
     }
 }

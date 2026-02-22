@@ -19,6 +19,8 @@ data class CalendarEvent(
     val color: Color,
     val assignee: String = "",
     val attendeeCount: Int = 0,
+    val location: String = "",
+    val description: String = "",
 )
 
 data class CourseInfo(
