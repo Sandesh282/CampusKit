@@ -36,4 +36,19 @@ object DataModule {
     fun provideYuckItemDao(database: AppDatabase): YuckItemDao {
         return database.yuckItemDao()
     }
+
+    @Provides
+    fun provideOfferingDao(database: AppDatabase): com.example.campuskit.data.academic.local.dao.OfferingDao {
+        return database.offeringDao()
+    }
+
+    @Provides
+    fun provideResourceDao(database: AppDatabase): com.example.campuskit.data.academic.local.dao.ResourceDao {
+        return database.resourceDao()
+    }
+
+    @Provides
+    fun provideSyncMetadataDao(database: AppDatabase): com.example.campuskit.data.academic.local.dao.SyncMetadataDao {
+        return database.syncMetadataDao()
+    }
 }

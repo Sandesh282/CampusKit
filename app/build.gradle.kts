@@ -75,6 +75,12 @@ dependencies {
     // Image loading
     implementation(libs.coil.compose)
 
+    // Retrofit & Moshi
+    implementation(libs.retrofit.core)
+    implementation(libs.retrofit.converter.moshi)
+    implementation(libs.moshi.kotlin)
+    ksp(libs.moshi.kotlin.codegen)
+
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
