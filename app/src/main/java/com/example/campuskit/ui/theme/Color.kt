@@ -55,3 +55,27 @@ val OnboardingAccent = Color(0xFF4A4E8C)
 val OnboardingAccentGreen = Color(0xFF4CAF50)
 val OnboardingCardBg = Color(0xFFFFFFFF)
 val OnboardingCardShadow = Color(0x1A000000)
+
+// ── Academic Pastel Cards ──
+val CardMint = Color(0xFFB8F0D8)
+val CardLavender = Color(0xFFD4C4F7)
+val CardPeach = Color(0xFFFDD5B1)
+val CardSky = Color(0xFFBAE1FF)
+val CardLemon = Color(0xFFF5F5A0)
+val CardRose = Color(0xFFF7B7C5)
+
+// Academic pastel card text (dark, readable on pastel)
+val CardTextDark = Color(0xFF1A1A2E)
+
+// ── Tag Chips ──
+val TagSelectedBg = Color(0xFFF5F5F5)
+val TagSelectedText = Color(0xFF0D0D0D)
+val TagUnselectedBg = Color(0xFF1F1F1F)
+val TagUnselectedText = Color(0xFF999999)
+
+// ── Search Bar ──
+val SearchBarBg = Color(0xFF1A1A1A)
+val SearchBarText = Color(0xFF888888)
+
+// ── Overall Attendance Card ──
+val OverallAttendanceBg = Color(0xFF1A1A2E)

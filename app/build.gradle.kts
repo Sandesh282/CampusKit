@@ -72,6 +72,9 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
+
     // Image loading
     implementation(libs.coil.compose)
 

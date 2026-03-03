@@ -2,6 +2,8 @@ package com.example.campuskit.ui.navigation
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -22,25 +24,28 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Event
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material.icons.filled.SearchOff
-import androidx.compose.material.icons.outlined.CalendarMonth
-import androidx.compose.material.icons.outlined.Event
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Restaurant
-import androidx.compose.material.icons.outlined.SearchOff
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Cottage
+import androidx.compose.material.icons.filled.ConfirmationNumber
+import androidx.compose.material.icons.filled.LunchDining
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.CalendarToday
+import androidx.compose.material.icons.outlined.Cottage
+import androidx.compose.material.icons.outlined.ConfirmationNumber
+import androidx.compose.material.icons.outlined.LunchDining
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -54,6 +59,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.campuskit.ui.academic.NotesListScreen
+import com.example.campuskit.ui.academic.QuestionPapersListScreen
 import com.example.campuskit.ui.calendar.CalendarScreen
 import com.example.campuskit.ui.events.EventsScreen
 import com.example.campuskit.ui.home.HomeScreen
@@ -63,7 +70,6 @@ import com.example.campuskit.ui.theme.AccentBlue
 import com.example.campuskit.ui.theme.Black
 import com.example.campuskit.ui.theme.NavBarDockBackground
 import com.example.campuskit.ui.theme.NavBarUnselected
-import com.example.campuskit.ui.theme.SquircleShapeLarge
 import com.example.campuskit.ui.theme.TextPrimary
 
 data class TabItem(
@@ -73,23 +79,31 @@ data class TabItem(
 )
 
 val tabs = listOf(
-    TabItem("Home", Icons.Filled.Home, Icons.Outlined.Home),
-    TabItem("Mess", Icons.Filled.Restaurant, Icons.Outlined.Restaurant),
-    TabItem("Events", Icons.Filled.Event, Icons.Outlined.Event),
-    TabItem("Lost", Icons.Filled.SearchOff, Icons.Outlined.SearchOff),
-    TabItem("Calendar", Icons.Filled.CalendarMonth, Icons.Outlined.CalendarMonth),
+    TabItem("Home", Icons.Filled.Cottage, Icons.Outlined.Cottage),
+    TabItem("Mess", Icons.Filled.LunchDining, Icons.Outlined.LunchDining),
+    TabItem("Events", Icons.Filled.ConfirmationNumber, Icons.Outlined.ConfirmationNumber),
+    TabItem("Lost", Icons.Filled.Search, Icons.Outlined.Search),
+    TabItem("Calendar", Icons.Filled.CalendarToday, Icons.Outlined.CalendarToday),
 )
+
+// Sub-navigation state for screens that slide over Home
+sealed class SubScreen {
+    data object None : SubScreen()
+    data class QuestionPapers(val subjectCode: String) : SubScreen()
+    data class Notes(val subjectCode: String) : SubScreen()
+}
 
 @Composable
 fun MainNavigation() {
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
+    var subScreen by remember { mutableStateOf<SubScreen>(SubScreen.None) }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Black),
     ) {
-        // Screen content with animated transitions
+        // Screen content
         AnimatedContent(
             targetState = selectedTab,
             modifier = Modifier
@@ -107,7 +121,27 @@ fun MainNavigation() {
             label = "tabContent",
         ) { tab ->
             when (tab) {
-                0 -> HomeScreen()
+                0 -> {
+                    // Check for active sub-screen
+                    when (val current = subScreen) {
+                        is SubScreen.QuestionPapers -> QuestionPapersListScreen(
+                            subjectCode = current.subjectCode,
+                            onBack = { subScreen = SubScreen.None },
+                        )
+                        is SubScreen.Notes -> NotesListScreen(
+                            subjectCode = current.subjectCode,
+                            onBack = { subScreen = SubScreen.None },
+                        )
+                        else -> HomeScreen(
+                            onNavigateToQuestionPapers = { code ->
+                                subScreen = SubScreen.QuestionPapers(code)
+                            },
+                            onNavigateToNotes = { code ->
+                                subScreen = SubScreen.Notes(code)
+                            },
+                        )
+                    }
+                }
                 1 -> MessScreen()
                 2 -> EventsScreen()
                 3 -> LostFoundScreen()
@@ -115,7 +149,12 @@ fun MainNavigation() {
             }
         }
 
-        // Custom bottom navigation dock
+        // Reset sub-screen when switching tabs
+        if (selectedTab != 0) {
+            subScreen = SubScreen.None
+        }
+
+        // Bottom nav
         CampusKitBottomBar(
             selectedTab = selectedTab,
             onTabSelected = { selectedTab = it },
@@ -133,23 +172,22 @@ private fun CampusKitBottomBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = 24.dp, vertical = 8.dp)
             .navigationBarsPadding(),
         contentAlignment = Alignment.Center,
     ) {
-        // Thick dock container
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .shadow(
                     elevation = 24.dp,
-                    shape = SquircleShapeLarge,
+                    shape = RoundedCornerShape(28.dp),
                     ambientColor = Color.Black,
                     spotColor = Color.Black,
                 )
-                .clip(SquircleShapeLarge)
+                .clip(RoundedCornerShape(28.dp))
                 .background(NavBarDockBackground)
-                .padding(horizontal = 12.dp, vertical = 10.dp),
+                .padding(horizontal = 8.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -170,18 +208,29 @@ private fun DockTabItem(
     isSelected: Boolean,
     onClick: () -> Unit,
 ) {
+    // Bouncy scale animation
     val scale by animateFloatAsState(
-        targetValue = if (isSelected) 1.08f else 1.0f,
+        targetValue = if (isSelected) 1.1f else 1.0f,
         animationSpec = spring(
-            dampingRatio = 0.6f,
-            stiffness = 400f,
+            dampingRatio = 0.45f,
+            stiffness = Spring.StiffnessMedium,
         ),
         label = "tabScale",
     )
 
+    // Bounce up animation
+    val offsetY by animateDpAsState(
+        targetValue = if (isSelected) (-2).dp else 0.dp,
+        animationSpec = spring(
+            dampingRatio = 0.45f,
+            stiffness = Spring.StiffnessMedium,
+        ),
+        label = "tabOffset",
+    )
+
     val bgAlpha by animateFloatAsState(
         targetValue = if (isSelected) 1f else 0f,
-        animationSpec = tween(300, easing = FastOutSlowInEasing),
+        animationSpec = tween(250, easing = FastOutSlowInEasing),
         label = "tabBg",
     )
 
@@ -189,6 +238,7 @@ private fun DockTabItem(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .scale(scale)
+            .offset(y = offsetY)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
@@ -196,12 +246,14 @@ private fun DockTabItem(
             )
             .padding(horizontal = 4.dp),
     ) {
+        // Pill-shaped selected indicator
         Box(
             modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape)
+                .width(56.dp)
+                .height(36.dp)
+                .clip(RoundedCornerShape(18.dp))
                 .background(
-                    AccentBlue.copy(alpha = bgAlpha * 0.2f),
+                    AccentBlue.copy(alpha = bgAlpha * 0.15f),
                 ),
             contentAlignment = Alignment.Center,
         ) {
@@ -209,7 +261,7 @@ private fun DockTabItem(
                 imageVector = if (isSelected) tab.selectedIcon else tab.unselectedIcon,
                 contentDescription = tab.label,
                 tint = if (isSelected) AccentBlue else NavBarUnselected,
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier.size(22.dp),
             )
         }
 

@@ -8,6 +8,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.campuskit.R
 
+val PlusJakartaSans = FontFamily(
+    Font(R.font.plus_jakarta_sans_regular, FontWeight.Normal),
+    Font(R.font.plus_jakarta_sans_medium, FontWeight.Medium),
+    Font(R.font.plus_jakarta_sans_semibold, FontWeight.SemiBold),
+    Font(R.font.plus_jakarta_sans_bold, FontWeight.Bold),
+)
+
+// Keep Inter available for fallback or specific uses
 val InterFontFamily = FontFamily(
     Font(R.font.inter_regular, FontWeight.Normal),
     Font(R.font.inter_medium, FontWeight.Medium),
@@ -17,44 +25,46 @@ val InterFontFamily = FontFamily(
 
 val CampusKitTypography = Typography(
     displayLarge = TextStyle(
-        fontFamily = InterFontFamily,
+        fontFamily = PlusJakartaSans,
         fontWeight = FontWeight.Bold,
-        fontSize = 32.sp,
-        lineHeight = 40.sp,
-        letterSpacing = (-0.5).sp,
+        fontSize = 34.sp,
+        lineHeight = 42.sp,
+        letterSpacing = (-0.8).sp,
         color = TextPrimary,
     ),
     headlineLarge = TextStyle(
-        fontFamily = InterFontFamily,
+        fontFamily = PlusJakartaSans,
         fontWeight = FontWeight.Bold,
         fontSize = 28.sp,
         lineHeight = 36.sp,
+        letterSpacing = (-0.3).sp,
         color = TextPrimary,
     ),
     headlineMedium = TextStyle(
-        fontFamily = InterFontFamily,
+        fontFamily = PlusJakartaSans,
         fontWeight = FontWeight.SemiBold,
         fontSize = 24.sp,
         lineHeight = 32.sp,
+        letterSpacing = (-0.2).sp,
         color = TextPrimary,
     ),
     titleLarge = TextStyle(
-        fontFamily = InterFontFamily,
+        fontFamily = PlusJakartaSans,
         fontWeight = FontWeight.SemiBold,
         fontSize = 20.sp,
         lineHeight = 28.sp,
         color = TextPrimary,
     ),
     titleMedium = TextStyle(
-        fontFamily = InterFontFamily,
+        fontFamily = PlusJakartaSans,
         fontWeight = FontWeight.Medium,
         fontSize = 16.sp,
         lineHeight = 24.sp,
-        letterSpacing = 0.15.sp,
+        letterSpacing = 0.1.sp,
         color = TextPrimary,
     ),
     titleSmall = TextStyle(
-        fontFamily = InterFontFamily,
+        fontFamily = PlusJakartaSans,
         fontWeight = FontWeight.Medium,
         fontSize = 14.sp,
         lineHeight = 20.sp,
@@ -62,31 +72,31 @@ val CampusKitTypography = Typography(
         color = TextSecondary,
     ),
     bodyLarge = TextStyle(
-        fontFamily = InterFontFamily,
+        fontFamily = PlusJakartaSans,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
         lineHeight = 24.sp,
-        letterSpacing = 0.5.sp,
+        letterSpacing = 0.3.sp,
         color = TextPrimary,
     ),
     bodyMedium = TextStyle(
-        fontFamily = InterFontFamily,
+        fontFamily = PlusJakartaSans,
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
         lineHeight = 20.sp,
-        letterSpacing = 0.25.sp,
+        letterSpacing = 0.2.sp,
         color = TextSecondary,
     ),
     bodySmall = TextStyle(
-        fontFamily = InterFontFamily,
+        fontFamily = PlusJakartaSans,
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp,
         lineHeight = 16.sp,
-        letterSpacing = 0.4.sp,
+        letterSpacing = 0.3.sp,
         color = TextTertiary,
     ),
     labelLarge = TextStyle(
-        fontFamily = InterFontFamily,
+        fontFamily = PlusJakartaSans,
         fontWeight = FontWeight.Medium,
         fontSize = 14.sp,
         lineHeight = 20.sp,
@@ -94,19 +104,19 @@ val CampusKitTypography = Typography(
         color = TextPrimary,
     ),
     labelMedium = TextStyle(
-        fontFamily = InterFontFamily,
+        fontFamily = PlusJakartaSans,
         fontWeight = FontWeight.Medium,
         fontSize = 12.sp,
         lineHeight = 16.sp,
-        letterSpacing = 0.5.sp,
+        letterSpacing = 0.3.sp,
         color = TextSecondary,
     ),
     labelSmall = TextStyle(
-        fontFamily = InterFontFamily,
+        fontFamily = PlusJakartaSans,
         fontWeight = FontWeight.Medium,
         fontSize = 10.sp,
         lineHeight = 14.sp,
-        letterSpacing = 0.5.sp,
+        letterSpacing = 0.3.sp,
         color = TextTertiary,
     ),
 )
