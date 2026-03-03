@@ -2,6 +2,8 @@ package com.example.campuskit.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.campuskit.data.academic.SubjectCatalog
+import com.example.campuskit.data.academic.local.dao.OfferingDao
 import com.example.campuskit.data.academic.prefs.AcademicPreferences
 import com.example.campuskit.data.academic.prefs.AcademicPreferencesManager
 import com.example.campuskit.data.attendance.AttendanceEntity
@@ -34,6 +36,7 @@ class HomeViewModel @Inject constructor(
     private val academicRepository: AcademicRepository,
     private val academicPrefsManager: AcademicPreferencesManager,
     private val calculateSafeBunksUseCase: CalculateSafeBunksUseCase,
+    private val offeringDao: OfferingDao,
 ) : ViewModel() {
 
     private val _selectedTag = MutableStateFlow(HomeTag.ATTENDANCE)
@@ -80,6 +83,27 @@ class HomeViewModel @Inject constructor(
     fun updateSemester(semester: Int) {
         viewModelScope.launch {
             academicPrefsManager.updateSemester(semester)
+        }
+    }
+
+    fun updateStudentName(name: String) {
+        viewModelScope.launch {
+            academicPrefsManager.updateStudentName(name)
+        }
+    }
+
+    /**
+     * Seeds subjects from the static catalog into Room
+     * so they appear instantly after semester selection.
+     */
+    fun seedSubjectsForSelection(program: Program, semester: Int) {
+        viewModelScope.launch {
+            val subjects = SubjectCatalog.getSubjects(program, semester)
+            val offerings = SubjectCatalog.getOfferings(program, semester)
+            if (subjects.isNotEmpty()) {
+                offeringDao.upsertSubjects(subjects)
+                offeringDao.upsertOfferings(offerings)
+            }
         }
     }
 

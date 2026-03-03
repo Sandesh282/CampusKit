@@ -20,12 +20,19 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,19 +40,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.campuskit.ui.theme.InterFontFamily
+import com.example.campuskit.ui.theme.PlusJakartaSans
 import com.example.campuskit.ui.theme.OnboardingAccent
 import com.example.campuskit.ui.theme.OnboardingBackground
+import com.example.campuskit.ui.theme.OnboardingText
 import com.example.campuskit.ui.theme.OnboardingTextSecondary
+import com.example.campuskit.ui.theme.OnboardingCardBg
 import kotlinx.coroutines.launch
 
 @Composable
 fun OnboardingScreen(
-    onComplete: () -> Unit,
+    onComplete: (studentName: String) -> Unit,
 ) {
     val pagerState = rememberPagerState(pageCount = { onboardingPages.size })
     val scope = rememberCoroutineScope()
     val currentPage = pagerState.currentPage
+
+    var showNameDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -108,7 +119,8 @@ fun OnboardingScreen(
                         )
                     }
                 } else {
-                    onComplete()
+                    // Last page — show name dialog before completing
+                    showNameDialog = true
                 }
             },
             modifier = Modifier
@@ -125,7 +137,7 @@ fun OnboardingScreen(
         ) {
             Text(
                 text = ctaLabel,
-                fontFamily = InterFontFamily,
+                fontFamily = PlusJakartaSans,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 16.sp,
             )
@@ -135,7 +147,7 @@ fun OnboardingScreen(
         if (currentPage == 0) {
             Text(
                 text = "Already have an account? Log in",
-                fontFamily = InterFontFamily,
+                fontFamily = PlusJakartaSans,
                 fontSize = 13.sp,
                 color = OnboardingTextSecondary,
                 textAlign = TextAlign.Center,
@@ -147,4 +159,88 @@ fun OnboardingScreen(
             Spacer(modifier = Modifier.height(12.dp))
         }
     }
+
+    // Name prompt dialog
+    if (showNameDialog) {
+        NamePromptDialog(
+            onConfirm = { name ->
+                showNameDialog = false
+                onComplete(name)
+            },
+            onSkip = {
+                showNameDialog = false
+                onComplete("")
+            },
+        )
+    }
+}
+
+@Composable
+private fun NamePromptDialog(
+    onConfirm: (String) -> Unit,
+    onSkip: () -> Unit,
+) {
+    var name by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onSkip,
+        containerColor = OnboardingCardBg,
+        shape = RoundedCornerShape(24.dp),
+        title = {
+            Text(
+                "What should we call you?",
+                fontFamily = PlusJakartaSans,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                color = OnboardingText,
+            )
+        },
+        text = {
+            Column {
+                Text(
+                    "This will personalize your Home screen.",
+                    fontFamily = PlusJakartaSans,
+                    fontSize = 14.sp,
+                    color = OnboardingTextSecondary,
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Your name", fontFamily = PlusJakartaSans) },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = OnboardingAccent,
+                        unfocusedBorderColor = OnboardingTextSecondary.copy(alpha = 0.3f),
+                        focusedLabelColor = OnboardingAccent,
+                        cursorColor = OnboardingAccent,
+                        focusedTextColor = OnboardingText,
+                        unfocusedTextColor = OnboardingText,
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { if (name.isNotBlank()) onConfirm(name.trim()) },
+            ) {
+                Text(
+                    "Continue",
+                    fontFamily = PlusJakartaSans,
+                    color = OnboardingAccent,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onSkip) {
+                Text(
+                    "Skip",
+                    fontFamily = PlusJakartaSans,
+                    color = OnboardingTextSecondary,
+                )
+            }
+        },
+    )
 }

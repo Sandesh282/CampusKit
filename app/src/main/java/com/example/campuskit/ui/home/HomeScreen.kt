@@ -140,6 +140,7 @@ fun HomeScreen(
                 HomeHeader(
                     semester = academicPrefs.semester,
                     program = academicPrefs.program,
+                    studentName = academicPrefs.studentName,
                     needsSetup = needsSetup,
                     onSemesterTap = { showSemesterDialog = true },
                 )
@@ -242,6 +243,7 @@ fun HomeScreen(
             onConfirm = { program, semester ->
                 viewModel.updateProgram(program)
                 viewModel.updateSemester(semester)
+                viewModel.seedSubjectsForSelection(program, semester)
                 viewModel.syncResources()
                 showSemesterDialog = false
             },
@@ -255,6 +257,7 @@ fun HomeScreen(
 private fun HomeHeader(
     semester: Int,
     program: Program,
+    studentName: String,
     needsSetup: Boolean,
     onSemesterTap: () -> Unit,
 ) {
@@ -264,8 +267,9 @@ private fun HomeHeader(
         verticalAlignment = Alignment.Top,
     ) {
         Column(modifier = Modifier.weight(1f)) {
+            val greeting = if (studentName.isNotBlank()) "Hello, $studentName" else "Hello 👋"
             Text(
-                text = "Hello 👋",
+                text = greeting,
                 style = MaterialTheme.typography.bodyMedium,
                 color = TextSecondary,
             )

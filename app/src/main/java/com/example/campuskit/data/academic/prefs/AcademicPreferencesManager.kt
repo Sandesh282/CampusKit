@@ -19,7 +19,8 @@ val Context.academicDataStore: DataStore<Preferences> by preferencesDataStore(na
 
 data class AcademicPreferences(
     val program: Program,
-    val semester: Semester
+    val semester: Semester,
+    val studentName: String = "",
 )
 
 @Singleton
@@ -28,6 +29,7 @@ class AcademicPreferencesManager @Inject constructor(
 ) {
     private val PROGRAM_KEY = stringPreferencesKey("academic_program")
     private val SEMESTER_KEY = intPreferencesKey("academic_semester")
+    private val NAME_KEY = stringPreferencesKey("student_name")
 
     val preferencesFlow: Flow<AcademicPreferences> = context.academicDataStore.data.map { preferences ->
         val programString = preferences[PROGRAM_KEY] ?: Program.UNKNOWN.name
@@ -37,8 +39,9 @@ class AcademicPreferencesManager @Inject constructor(
             Program.UNKNOWN
         }
         val semester = preferences[SEMESTER_KEY] ?: 1
+        val name = preferences[NAME_KEY] ?: ""
 
-        AcademicPreferences(program, semester)
+        AcademicPreferences(program, semester, name)
     }
 
     suspend fun updateProgram(program: Program) {
@@ -50,6 +53,12 @@ class AcademicPreferencesManager @Inject constructor(
     suspend fun updateSemester(semester: Semester) {
         context.academicDataStore.edit { preferences ->
             preferences[SEMESTER_KEY] = semester
+        }
+    }
+
+    suspend fun updateStudentName(name: String) {
+        context.academicDataStore.edit { preferences ->
+            preferences[NAME_KEY] = name.trim()
         }
     }
 }
