@@ -17,34 +17,40 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import com.example.campuskit.data.academic.prefs.AcademicPreferencesManager
 import com.example.campuskit.ui.navigation.MainNavigation
 import com.example.campuskit.ui.onboarding.OnboardingScreen
 import com.example.campuskit.ui.theme.CampusKitTheme
 import com.example.campuskit.ui.theme.OnboardingBackground
 import com.example.campuskit.ui.theme.OnboardingTheme
-
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject lateinit var academicPrefsManager: AcademicPreferencesManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            AppRoot()
+            AppRoot(academicPrefsManager)
         }
     }
 }
 
 @Composable
-private fun AppRoot() {
+private fun AppRoot(academicPrefsManager: AcademicPreferencesManager) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("campuskit_prefs", 0) }
     var showOnboarding by remember { mutableStateOf(!prefs.getBoolean("onboarding_completed", false)) }
+    val scope = rememberCoroutineScope()
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Main app always renders underneath
@@ -66,8 +72,13 @@ private fun AppRoot() {
                         .background(OnboardingBackground)
                 ) {
                     OnboardingScreen(
-                        onComplete = {
+                        onComplete = { studentName ->
                             prefs.edit().putBoolean("onboarding_completed", true).apply()
+                            if (studentName.isNotBlank()) {
+                                scope.launch {
+                                    academicPrefsManager.updateStudentName(studentName)
+                                }
+                            }
                             showOnboarding = false
                         },
                     )

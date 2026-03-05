@@ -267,21 +267,20 @@ private fun HomeHeader(
         verticalAlignment = Alignment.Top,
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            val greeting = if (studentName.isNotBlank()) "Hello, $studentName" else "Hello 👋"
             Text(
-                text = greeting,
+                text = "Hello",
                 style = MaterialTheme.typography.bodyMedium,
                 color = TextSecondary,
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = if (needsSetup) "Your Campus" else "Semester $semester",
+                text = if (studentName.isNotBlank()) studentName else "Your Campus",
                 style = MaterialTheme.typography.displayLarge,
                 color = TextPrimary,
             )
             if (!needsSetup) {
                 Text(
-                    text = program.name,
+                    text = "Semester $semester · ${program.name}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = AccentBlue,
                     modifier = Modifier
