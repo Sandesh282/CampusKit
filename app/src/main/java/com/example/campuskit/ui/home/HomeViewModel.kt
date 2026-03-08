@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
@@ -103,6 +104,20 @@ class HomeViewModel @Inject constructor(
             if (subjects.isNotEmpty()) {
                 offeringDao.upsertSubjects(subjects)
                 offeringDao.upsertOfferings(offerings)
+
+                // Also auto-load them into the Attendance tracker if not already present
+                val currentAttendance = attendanceRepository.getAllSubjects().first()
+                val currentNames = currentAttendance.map { it.subjectName.lowercase() }
+
+                subjects.forEach { subject ->
+                    if (subject.name.lowercase() !in currentNames) {
+                        attendanceRepository.insertSubject(
+                            com.example.campuskit.data.attendance.AttendanceEntity(
+                                subjectName = subject.name
+                            )
+                        )
+                    }
+                }
             }
         }
     }
