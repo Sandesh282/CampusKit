@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -49,6 +50,7 @@ import com.example.campuskit.ui.theme.TextTertiary
 fun NotesListScreen(
     subjectCode: String,
     onBack: () -> Unit,
+    onOpenPdf: (url: String, title: String) -> Unit,
     viewModel: AcademicDetailViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -64,6 +66,7 @@ fun NotesListScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Black)
+            .statusBarsPadding()
             .padding(horizontal = 20.dp),
     ) {
         Spacer(modifier = Modifier.height(16.dp))
@@ -117,8 +120,7 @@ fun NotesListScreen(
                     NoteCard(
                         note = note,
                         onClick = {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(note.url))
-                            context.startActivity(intent)
+                            onOpenPdf(note.url, note.title.ifBlank { "Note" })
                         },
                     )
                 }

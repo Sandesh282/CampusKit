@@ -54,12 +54,14 @@ class HomeViewModel @Inject constructor(
         )
 
     val attendanceSubjects: StateFlow<List<AttendanceEntity>> =
-        combine(
-            attendanceRepository.getAllSubjects(),
-            _searchQuery
-        ) { subjects, query ->
-            if (query.isBlank()) subjects
-            else subjects.filter { it.subjectName.contains(query, ignoreCase = true) }
+        academicPrefsManager.preferencesFlow.flatMapLatest { prefs ->
+            combine(
+                attendanceRepository.getSubjectsForSemester(prefs.program.name, prefs.semester),
+                _searchQuery
+            ) { subjects, query ->
+                if (query.isBlank()) subjects
+                else subjects.filter { it.subjectName.contains(query, ignoreCase = true) }
+            }
         }.stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
@@ -127,18 +129,16 @@ class HomeViewModel @Inject constructor(
                 offeringDao.upsertSubjects(subjects)
                 offeringDao.upsertOfferings(offerings)
 
-                // Also auto-load them into the Attendance tracker if not already present
-                val currentAttendance = attendanceRepository.getAllSubjects().first()
-                val currentNames = currentAttendance.map { it.subjectName.lowercase() }
-
+                // 1. Just insert the new ones. The DB unique constraint + OnConflictStrategy.IGNORE 
+                //    will ensure we don't duplicate but also don't overwrite user attendance data.
                 subjects.forEach { subject ->
-                    if (subject.name.lowercase() !in currentNames) {
-                        attendanceRepository.insertSubject(
-                            com.example.campuskit.data.attendance.AttendanceEntity(
-                                subjectName = subject.name
-                            )
+                    attendanceRepository.insertSubject(
+                        AttendanceEntity(
+                            subjectName = subject.name,
+                            program = program.name,
+                            semester = semester
                         )
-                    }
+                    )
                 }
             }
         }

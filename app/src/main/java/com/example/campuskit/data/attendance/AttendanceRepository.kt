@@ -11,6 +11,9 @@ class AttendanceRepository @Inject constructor(
 ) {
     fun getAllSubjects(): Flow<List<AttendanceEntity>> = attendanceDao.getAllSubjects()
 
+    fun getSubjectsForSemester(program: String, semester: Int): Flow<List<AttendanceEntity>> = 
+        attendanceDao.getSubjectsForSemester(program, semester)
+
     suspend fun insertSubject(subject: AttendanceEntity) = attendanceDao.insert(subject)
 
     suspend fun deleteSubject(subject: AttendanceEntity) = attendanceDao.delete(subject)

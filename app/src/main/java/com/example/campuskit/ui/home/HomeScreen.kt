@@ -110,7 +110,6 @@ fun HomeScreen(
     val academicSubjects by viewModel.academicSubjects.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
 
-    var showAddDialog by remember { mutableStateOf(false) }
     var showSemesterDialog by remember { mutableStateOf(false) }
     var isSearchActive by remember { mutableStateOf(false) }
 
@@ -121,7 +120,7 @@ fun HomeScreen(
         floatingActionButton = {
             if (selectedTag == HomeTag.ATTENDANCE) {
                 FloatingActionButton(
-                    onClick = { showAddDialog = true },
+                    onClick = { showSemesterDialog = true },
                     containerColor = AccentBlue,
                     contentColor = Black,
                     shape = SquircleShape,
@@ -245,16 +244,6 @@ fun HomeScreen(
 
             item { Spacer(modifier = Modifier.height(80.dp)) }
         }
-    }
-
-    if (showAddDialog) {
-        AddSubjectDialog(
-            onDismiss = { showAddDialog = false },
-            onAdd = { name ->
-                viewModel.addSubject(name)
-                showAddDialog = false
-            },
-        )
     }
 
     if (showSemesterDialog) {
@@ -819,49 +808,3 @@ fun CircularAttendanceProgress(
     }
 }
 
-// ── Add Subject Dialog ──
-@Composable
-fun AddSubjectDialog(
-    onDismiss: () -> Unit,
-    onAdd: (String) -> Unit,
-) {
-    var subjectName by remember { mutableStateOf("") }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        containerColor = CardBackground,
-        shape = SquircleShape,
-        title = {
-            Text("Add Subject", color = TextPrimary, fontWeight = FontWeight.SemiBold)
-        },
-        text = {
-            OutlinedTextField(
-                value = subjectName,
-                onValueChange = { subjectName = it },
-                label = { Text("Subject Name") },
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = AccentBlue,
-                    unfocusedBorderColor = SurfaceVariant,
-                    focusedLabelColor = AccentBlue,
-                    cursorColor = AccentBlue,
-                    focusedTextColor = TextPrimary,
-                    unfocusedTextColor = TextPrimary,
-                ),
-                modifier = Modifier.fillMaxWidth(),
-            )
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { if (subjectName.isNotBlank()) onAdd(subjectName) },
-            ) {
-                Text("Add", color = AccentBlue, fontWeight = FontWeight.SemiBold)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel", color = TextTertiary)
-            }
-        },
-    )
-}

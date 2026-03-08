@@ -60,6 +60,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.campuskit.ui.academic.NotesListScreen
+import com.example.campuskit.ui.academic.PdfViewerScreen
 import com.example.campuskit.ui.academic.QuestionPapersListScreen
 import com.example.campuskit.ui.calendar.CalendarScreen
 import com.example.campuskit.ui.events.EventsScreen
@@ -91,57 +92,96 @@ sealed class SubScreen {
     data object None : SubScreen()
     data class QuestionPapers(val subjectCode: String) : SubScreen()
     data class Notes(val subjectCode: String) : SubScreen()
+    data class PdfViewer(val url: String, val title: String) : SubScreen()
 }
 
-@Composable
-fun MainNavigation() {
-    var selectedTab by rememberSaveable { mutableIntStateOf(0) }
-    var subScreen by remember { mutableStateOf<SubScreen>(SubScreen.None) }
+    @Composable
+    fun MainNavigation() {
+        var selectedTab by rememberSaveable { mutableIntStateOf(0) }
+        var subScreenStack by remember { mutableStateOf<List<SubScreen>>(emptyList()) }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Black),
-    ) {
-        // Screen content
-        AnimatedContent(
-            targetState = selectedTab,
+        val currentSubScreen = subScreenStack.lastOrNull() ?: SubScreen.None
+
+        fun push(screen: SubScreen) {
+            subScreenStack = subScreenStack + screen
+        }
+
+        fun pop() {
+            if (subScreenStack.isNotEmpty()) {
+                subScreenStack = subScreenStack.dropLast(1)
+            }
+        }
+
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 96.dp),
-            transitionSpec = {
-                val direction = if (targetState > initialState) 1 else -1
-                (fadeIn(tween(250, easing = FastOutSlowInEasing)) +
-                    slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { direction * 40 })
-                    .togetherWith(
-                        fadeOut(tween(200, easing = FastOutSlowInEasing)) +
-                            slideOutHorizontally(tween(250, easing = FastOutSlowInEasing)) { -direction * 40 },
-                    )
-            },
-            label = "tabContent",
-        ) { tab ->
-            when (tab) {
-                0 -> {
-                    // Check for active sub-screen
-                    when (val current = subScreen) {
-                        is SubScreen.QuestionPapers -> QuestionPapersListScreen(
-                            subjectCode = current.subjectCode,
-                            onBack = { subScreen = SubScreen.None },
+                .background(Black),
+        ) {
+            // Screen content
+            AnimatedContent(
+                targetState = selectedTab,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 96.dp),
+                transitionSpec = {
+                    val direction = if (targetState > initialState) 1 else -1
+                    (fadeIn(tween(250, easing = FastOutSlowInEasing)) +
+                        slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { direction * 40 })
+                        .togetherWith(
+                            fadeOut(tween(200, easing = FastOutSlowInEasing)) +
+                                slideOutHorizontally(tween(250, easing = FastOutSlowInEasing)) { -direction * 40 },
                         )
-                        is SubScreen.Notes -> NotesListScreen(
-                            subjectCode = current.subjectCode,
-                            onBack = { subScreen = SubScreen.None },
-                        )
-                        else -> HomeScreen(
-                            onNavigateToQuestionPapers = { code ->
-                                subScreen = SubScreen.QuestionPapers(code)
+                },
+                label = "tabContent",
+            ) { tab ->
+                when (tab) {
+                    0 -> {
+                        AnimatedContent(
+                            targetState = currentSubScreen,
+                            transitionSpec = {
+                                if (targetState != SubScreen.None && initialState == SubScreen.None) {
+                                    // Pushing first subscreen over Home
+                                    (slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { it })
+                                        .togetherWith(fadeOut(tween(300)))
+                                } else if (targetState == SubScreen.None && initialState != SubScreen.None) {
+                                    // Popping back to Home
+                                    fadeIn(tween(300))
+                                        .togetherWith(slideOutHorizontally(tween(300, easing = FastOutSlowInEasing)) { it })
+                                } else if (targetState is SubScreen.PdfViewer) {
+                                    // Pushing PDF over another subscreen
+                                    (slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { it })
+                                        .togetherWith(slideOutHorizontally(tween(300, easing = FastOutSlowInEasing)) { -it / 3 })
+                                } else {
+                                    // Popping PDF back to subscreen
+                                    (slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { -it / 3 })
+                                        .togetherWith(slideOutHorizontally(tween(300, easing = FastOutSlowInEasing)) { it })
+                                }
                             },
-                            onNavigateToNotes = { code ->
-                                subScreen = SubScreen.Notes(code)
-                            },
-                        )
+                            label = "subScreenTransition"
+                        ) { screen ->
+                            when (screen) {
+                                is SubScreen.QuestionPapers -> QuestionPapersListScreen(
+                                    subjectCode = screen.subjectCode,
+                                    onBack = { pop() },
+                                    onOpenPdf = { url, title -> push(SubScreen.PdfViewer(url, title)) }
+                                )
+                                is SubScreen.Notes -> NotesListScreen(
+                                    subjectCode = screen.subjectCode,
+                                    onBack = { pop() },
+                                    onOpenPdf = { url, title -> push(SubScreen.PdfViewer(url, title)) }
+                                )
+                                is SubScreen.PdfViewer -> PdfViewerScreen(
+                                    url = screen.url,
+                                    title = screen.title,
+                                    onBack = { pop() }
+                                )
+                                SubScreen.None -> HomeScreen(
+                                    onNavigateToQuestionPapers = { code -> push(SubScreen.QuestionPapers(code)) },
+                                    onNavigateToNotes = { code -> push(SubScreen.Notes(code)) },
+                                )
+                            }
+                        }
                     }
-                }
                 1 -> MessScreen()
                 2 -> EventsScreen()
                 3 -> LostFoundScreen()
@@ -151,7 +191,7 @@ fun MainNavigation() {
 
         // Reset sub-screen when switching tabs
         if (selectedTab != 0) {
-            subScreen = SubScreen.None
+            subScreenStack = emptyList()
         }
 
         // Bottom nav

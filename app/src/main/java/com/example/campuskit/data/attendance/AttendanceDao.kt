@@ -14,10 +14,13 @@ interface AttendanceDao {
     @Query("SELECT * FROM attendance ORDER BY subjectName ASC")
     fun getAllSubjects(): Flow<List<AttendanceEntity>>
 
+    @Query("SELECT * FROM attendance WHERE program = :program AND semester = :semester ORDER BY subjectName ASC")
+    fun getSubjectsForSemester(program: String, semester: Int): Flow<List<AttendanceEntity>>
+
     @Query("SELECT * FROM attendance WHERE subjectId = :id")
     suspend fun getBySubjectId(id: Long): AttendanceEntity?
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(entity: AttendanceEntity): Long
 
     @Update
