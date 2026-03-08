@@ -29,8 +29,10 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material.icons.outlined.MoreHoriz
@@ -106,9 +108,11 @@ fun HomeScreen(
     val attendanceSubjects by viewModel.attendanceSubjects.collectAsState()
     val academicPrefs by viewModel.academicPreferences.collectAsState()
     val academicSubjects by viewModel.academicSubjects.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
 
     var showAddDialog by remember { mutableStateOf(false) }
     var showSemesterDialog by remember { mutableStateOf(false) }
+    var isSearchActive by remember { mutableStateOf(false) }
 
     val needsSetup = academicPrefs.program == Program.UNKNOWN
 
@@ -137,13 +141,30 @@ fun HomeScreen(
             // ── Header ──
             item {
                 Spacer(modifier = Modifier.height(16.dp))
-                HomeHeader(
-                    semester = academicPrefs.semester,
-                    program = academicPrefs.program,
-                    studentName = academicPrefs.studentName,
-                    needsSetup = needsSetup,
-                    onSemesterTap = { showSemesterDialog = true },
-                )
+                AnimatedContent(
+                    targetState = isSearchActive,
+                    label = "search_header_anim"
+                ) { searchActive ->
+                    if (searchActive) {
+                        HomeSearchBar(
+                            query = searchQuery,
+                            onQueryChange = { viewModel.updateSearchQuery(it) },
+                            onClose = {
+                                isSearchActive = false
+                                viewModel.updateSearchQuery("")
+                            }
+                        )
+                    } else {
+                        HomeHeader(
+                            semester = academicPrefs.semester,
+                            program = academicPrefs.program,
+                            studentName = academicPrefs.studentName,
+                            needsSetup = needsSetup,
+                            onSearchTap = { isSearchActive = true },
+                            onSemesterTap = { showSemesterDialog = true },
+                        )
+                    }
+                }
             }
 
             // ── Tag Row ──
@@ -259,6 +280,7 @@ private fun HomeHeader(
     program: Program,
     studentName: String,
     needsSetup: Boolean,
+    onSearchTap: () -> Unit,
     onSemesterTap: () -> Unit,
 ) {
     Row(
@@ -303,7 +325,7 @@ private fun HomeHeader(
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
-                        onClick = { /* Search placeholder */ },
+                        onClick = onSearchTap,
                     ),
                 contentAlignment = Alignment.Center,
             ) {
@@ -334,6 +356,48 @@ private fun HomeHeader(
                 )
             }
         }
+    }
+}
+
+// ── Search Bar ──
+@Composable
+private fun HomeSearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    onClose: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth().height(60.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        IconButton(onClick = onClose) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Close Search", tint = TextPrimary)
+        }
+        
+        OutlinedTextField(
+            value = query,
+            onValueChange = onQueryChange,
+            placeholder = { Text("Search subjects...", color = TextSecondary) },
+            singleLine = true,
+            modifier = Modifier.weight(1f),
+            shape = CircleShape,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = AccentBlue,
+                unfocusedBorderColor = SurfaceVariant,
+                focusedContainerColor = SurfaceVariant.copy(alpha = 0.5f),
+                unfocusedContainerColor = SurfaceVariant.copy(alpha = 0.5f),
+                focusedTextColor = TextPrimary,
+                unfocusedTextColor = TextPrimary,
+            ),
+            trailingIcon = {
+                if (query.isNotEmpty()) {
+                    IconButton(onClick = { onQueryChange("") }) {
+                        Icon(Icons.Filled.Clear, contentDescription = "Clear", tint = TextSecondary)
+                    }
+                }
+            }
+        )
     }
 }
 

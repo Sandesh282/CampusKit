@@ -43,6 +43,9 @@ class HomeViewModel @Inject constructor(
     private val _selectedTag = MutableStateFlow(HomeTag.ATTENDANCE)
     val selectedTag: StateFlow<HomeTag> = _selectedTag.asStateFlow()
 
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
     val academicPreferences: StateFlow<AcademicPreferences> =
         academicPrefsManager.preferencesFlow.stateIn(
             viewModelScope,
@@ -51,19 +54,33 @@ class HomeViewModel @Inject constructor(
         )
 
     val attendanceSubjects: StateFlow<List<AttendanceEntity>> =
-        attendanceRepository.getAllSubjects().stateIn(
+        combine(
+            attendanceRepository.getAllSubjects(),
+            _searchQuery
+        ) { subjects, query ->
+            if (query.isBlank()) subjects
+            else subjects.filter { it.subjectName.contains(query, ignoreCase = true) }
+        }.stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
             emptyList(),
         )
 
-    // Academic subjects from the current semester selection
+    // Academic subjects from the current semester selection, filtered by search query
     val academicSubjects: StateFlow<List<Subject>> =
-        academicPrefsManager.preferencesFlow.flatMapLatest { prefs ->
-            if (prefs.program == Program.UNKNOWN) {
-                flowOf(emptyList())
-            } else {
-                academicRepository.getSubjects(prefs.program, prefs.semester)
+        combine(
+            academicPrefsManager.preferencesFlow.flatMapLatest { prefs ->
+                if (prefs.program == Program.UNKNOWN) {
+                    flowOf(emptyList())
+                } else {
+                    academicRepository.getSubjects(prefs.program, prefs.semester)
+                }
+            },
+            _searchQuery
+        ) { subjects, query ->
+            if (query.isBlank()) subjects
+            else subjects.filter {
+                it.name.contains(query, ignoreCase = true) || it.code.contains(query, ignoreCase = true)
             }
         }.stateIn(
             viewModelScope,
@@ -73,6 +90,11 @@ class HomeViewModel @Inject constructor(
 
     fun selectTag(tag: HomeTag) {
         _selectedTag.value = tag
+        _searchQuery.value = "" // Clear search when switching tabs
+    }
+
+    fun updateSearchQuery(query: String) {
+        _searchQuery.value = query
     }
 
     fun updateProgram(program: Program) {
