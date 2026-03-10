@@ -1,6 +1,8 @@
 package com.example.campuskit.ui.mess
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
@@ -13,7 +15,6 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -42,6 +43,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,6 +52,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -149,38 +152,46 @@ fun MessScreen(viewModel: MessViewModel = hiltViewModel()) {
                 }
             }
 
-            // Meal cards
+            // Meal cards with stagger animation
             item {
-                MealCard(
-                    title = "🌅  Breakfast",
-                    items = todayMenu.breakfast,
-                    yuckItems = yuckItems.map { it.itemName },
-                    viewModel = viewModel,
-                )
+                AnimatedMealCard(index = 0) {
+                    MealCard(
+                        title = "🌅  Breakfast",
+                        items = todayMenu.breakfast,
+                        yuckItems = yuckItems.map { it.itemName },
+                        viewModel = viewModel,
+                    )
+                }
             }
             item {
-                MealCard(
-                    title = "☀️  Lunch",
-                    items = todayMenu.lunch,
-                    yuckItems = yuckItems.map { it.itemName },
-                    viewModel = viewModel,
-                )
+                AnimatedMealCard(index = 1) {
+                    MealCard(
+                        title = "☀️  Lunch",
+                        items = todayMenu.lunch,
+                        yuckItems = yuckItems.map { it.itemName },
+                        viewModel = viewModel,
+                    )
+                }
             }
             item {
-                MealCard(
-                    title = "☕  Snacks",
-                    items = todayMenu.snacks,
-                    yuckItems = yuckItems.map { it.itemName },
-                    viewModel = viewModel,
-                )
+                AnimatedMealCard(index = 2) {
+                    MealCard(
+                        title = "☕  Snacks",
+                        items = todayMenu.snacks,
+                        yuckItems = yuckItems.map { it.itemName },
+                        viewModel = viewModel,
+                    )
+                }
             }
             item {
-                MealCard(
-                    title = "🌙  Dinner",
-                    items = todayMenu.dinner,
-                    yuckItems = yuckItems.map { it.itemName },
-                    viewModel = viewModel,
-                )
+                AnimatedMealCard(index = 3) {
+                    MealCard(
+                        title = "🌙  Dinner",
+                        items = todayMenu.dinner,
+                        yuckItems = yuckItems.map { it.itemName },
+                        viewModel = viewModel,
+                    )
+                }
             }
 
             // Yuck filter section
@@ -340,6 +351,31 @@ fun MessScreen(viewModel: MessViewModel = hiltViewModel()) {
                 showYuckDialog = false
             },
         )
+    }
+}
+
+@Composable
+private fun AnimatedMealCard(index: Int, content: @Composable () -> Unit) {
+    val animProgress = remember { Animatable(0f) }
+
+    LaunchedEffect(index) {
+        animProgress.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(
+                durationMillis = 350,
+                delayMillis = index * 100,
+            ),
+        )
+    }
+
+    Box(
+        modifier = Modifier
+            .graphicsLayer {
+                alpha = animProgress.value
+                translationY = (1f - animProgress.value) * 30f
+            },
+    ) {
+        content()
     }
 }
 
