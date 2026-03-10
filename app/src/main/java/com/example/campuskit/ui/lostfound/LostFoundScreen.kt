@@ -2,6 +2,8 @@ package com.example.campuskit.ui.lostfound
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,27 +11,26 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -37,6 +38,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,8 +48,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -108,22 +112,29 @@ fun LostFoundScreen(viewModel: LostFoundViewModel = hiltViewModel()) {
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            items(items, key = { it.id }) { item ->
-                LostFoundCard(
-                    item = item,
-                    onWhatsApp = { number ->
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/$number"))
-                        context.startActivity(intent)
-                    },
-                    onTelegram = { username ->
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/$username"))
-                        context.startActivity(intent)
-                    },
-                    onPhone = { number ->
-                        val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$number"))
-                        context.startActivity(intent)
-                    },
-                )
+            if (items.isEmpty()) {
+                item {
+                    EmptyLostFoundPlaceholder()
+                }
+            } else {
+                itemsIndexed(items, key = { _, item -> item.id }) { index, item ->
+                    AnimatedLostFoundCard(
+                        item = item,
+                        index = index,
+                        onWhatsApp = { number ->
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/$number"))
+                            context.startActivity(intent)
+                        },
+                        onTelegram = { username ->
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/$username"))
+                            context.startActivity(intent)
+                        },
+                        onPhone = { number ->
+                            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$number"))
+                            context.startActivity(intent)
+                        },
+                    )
+                }
             }
 
             item { Spacer(modifier = Modifier.height(80.dp)) }
@@ -146,6 +157,73 @@ fun LostFoundScreen(viewModel: LostFoundViewModel = hiltViewModel()) {
                 )
                 showPostDialog = false
             },
+        )
+    }
+}
+
+@Composable
+private fun EmptyLostFoundPlaceholder() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 60.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Icon(
+            Icons.Outlined.Inventory2,
+            contentDescription = null,
+            tint = TextTertiary.copy(alpha = 0.4f),
+            modifier = Modifier.size(72.dp),
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Nothing here yet",
+            style = MaterialTheme.typography.titleMedium,
+            color = TextSecondary,
+            fontWeight = FontWeight.SemiBold,
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = "Found something on campus?\nTap + to help someone find it",
+            style = MaterialTheme.typography.bodySmall,
+            color = TextTertiary,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+@Composable
+private fun AnimatedLostFoundCard(
+    item: LostFoundItem,
+    index: Int,
+    onWhatsApp: (String) -> Unit,
+    onTelegram: (String) -> Unit,
+    onPhone: (String) -> Unit,
+) {
+    val animProgress = remember { Animatable(0f) }
+
+    LaunchedEffect(item.id) {
+        animProgress.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(
+                durationMillis = 400,
+                delayMillis = index * 80,
+            ),
+        )
+    }
+
+    Box(
+        modifier = Modifier
+            .graphicsLayer {
+                alpha = animProgress.value
+                translationY = (1f - animProgress.value) * 40f
+            },
+    ) {
+        LostFoundCard(
+            item = item,
+            onWhatsApp = onWhatsApp,
+            onTelegram = onTelegram,
+            onPhone = onPhone,
         )
     }
 }
