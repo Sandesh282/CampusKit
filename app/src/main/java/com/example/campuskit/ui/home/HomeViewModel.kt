@@ -28,8 +28,22 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/** Content tags available on the Home screen. */
 enum class HomeTag { ATTENDANCE, QUESTION_PAPERS, NOTES }
 
+/**
+ * Central ViewModel for the Home screen.
+ *
+ * Coordinates attendance tracking, academic resources (QP/Notes),
+ * and semester selection. Attendance subjects are filtered reactively
+ * based on the currently selected [Program] and semester.
+ *
+ * @param attendanceRepository  Room-backed attendance data source
+ * @param academicRepository    Remote + local academic resources
+ * @param academicPrefsManager  DataStore-backed semester/program preferences
+ * @param calculateSafeBunksUseCase  Domain logic for attendance health
+ * @param offeringDao           DAO for subject/offering catalog data
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class HomeViewModel @Inject constructor(

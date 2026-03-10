@@ -1,10 +1,17 @@
 package com.example.campuskit.data.attendance
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-import androidx.room.Index
-
+/**
+ * Room entity representing a subject's attendance record.
+ *
+ * Each row tracks attended vs total classes for a single subject within
+ * a specific [program] and [semester]. The unique index on
+ * `(subjectName, program, semester)` prevents duplicate entries and
+ * allows historical data to coexist across different academic terms.
+ */
 @Entity(
     tableName = "attendance",
     indices = [Index(value = ["subjectName", "program", "semester"], unique = true)]
