@@ -37,7 +37,7 @@ abstract class RepositoryModule {
         @Singleton
         fun provideStudentHubApi(moshi: Moshi): StudentHubApi {
             return Retrofit.Builder()
-                .baseUrl("https://student-hub.iiitl.ac.in/") // Assuming base URL for now
+                .baseUrl("https://studenthub.axiosiiitl.dev/") // StudentHub backend
                 .addConverterFactory(MoshiConverterFactory.create(moshi))
                 .build()
                 .create(StudentHubApi::class.java)
