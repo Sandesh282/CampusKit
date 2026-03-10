@@ -71,4 +71,38 @@ class CalculateSafeBunksUseCaseTest {
         assert(result is AttendanceStatus.Critical)
         assertEquals(2, (result as AttendanceStatus.Critical).needToAttend)
     }
+
+    @Test
+    fun `invoke returns NoData status when total is 0`() {
+        val result = useCase(0, 0, 75f)
+        assert(result is AttendanceStatus.NoData)
+    }
+
+    @Test
+    fun `calculatePercentage returns 0 when 0 attended out of many`() {
+        val result = useCase.calculatePercentage(0, 10)
+        assertEquals(0f, result, 0.01f)
+    }
+
+    @Test
+    fun `calculateSafeBunks handles perfect attendance over many classes`() {
+        // 50/50 = 100%. Min 75%.
+        // safeBunks = floor((50 - 0.75*50) / 0.75) = floor(12.5/0.75) = floor(16.67) = 16
+        val result = useCase.calculateSafeBunks(50, 50, 75f)
+        assertEquals(16, result)
+    }
+
+    @Test
+    fun `calculateClassesNeeded returns 0 when already above threshold`() {
+        // 9/10 = 90%. Min 75%.
+        val result = useCase.calculateClassesNeeded(9, 10, 75f)
+        assertEquals(0, result)
+    }
+
+    @Test
+    fun `invoke returns Safe for high attendance with strict threshold`() {
+        // 19/20 = 95%. Min 80%. 95 >= 80+10.
+        val result = useCase(19, 20, 80f)
+        assert(result is AttendanceStatus.Safe)
+    }
 }
