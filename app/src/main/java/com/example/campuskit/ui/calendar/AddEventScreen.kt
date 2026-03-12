@@ -49,6 +49,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -64,6 +65,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.campuskit.ui.theme.CampusKitTheme
 import com.example.campuskit.ui.theme.AccentBlue
 import com.example.campuskit.ui.theme.Black
 import com.example.campuskit.ui.theme.CardBackground
@@ -570,5 +572,19 @@ fun TimePickerDialog(
                 }
             }
         }
+    }
+}
+@Preview(
+    name = "Add Event Screen",
+    showBackground = true,
+    backgroundColor = 0xFF000000
+)
+@Composable
+fun AddEventScreenPreview() {
+    CampusKitTheme {
+        AddEventScreen(
+            onDismiss = {},
+            onSave = {}
+        )
     }
 }

@@ -44,6 +44,10 @@ class MessViewModel @Inject constructor(
         }
     }
 
+    fun getMenuForDay(day: java.time.DayOfWeek): DayMenu {
+        return MessMenuData.getWeeklyMenu().first { it.day == day }
+    }
+
     fun isYuckItem(itemName: String, yuckList: List<YuckItemEntity>): Boolean {
         return yuckList.any { yuck ->
             itemName.contains(yuck.itemName, ignoreCase = true)
