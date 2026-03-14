@@ -10,6 +10,25 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
 
+/**
+ * Domain model representing a calendar event.
+ *
+ * Used by the Calendar feature's grid and timeline views.
+ * Backed by [CalendarEventEntity] in Room.
+ *
+ * @param id unique identifier
+ * @param title event title
+ * @param date the date of the event
+ * @param startTime start time
+ * @param endTime end time
+ * @param color display color for the event block
+ */
+/**
+ * Domain model representing a calendar event.
+ *
+ * Used by the Calendar feature grid and timeline views.
+ * Backed by [CalendarEventEntity] in Room.
+ */
 data class CalendarEvent(
     val id: String,
     val title: String,
@@ -23,12 +42,20 @@ data class CalendarEvent(
     val description: String = "",
 )
 
+/**
+ * Represents course attendance data for the calendar grid overlay.
+ *
+ * @param name course name
+ * @param color display color for attendance dots
+ * @param datesAttended set of dates the student attended this course
+ */
 data class CourseInfo(
     val name: String,
     val color: Color,
     val datesAttended: Set<LocalDate> = emptySet(),
 )
 
+/** Provides static mock calendar events and course data for first-launch demo. */
 object MockCalendarData {
 
     private val today: LocalDate = LocalDate.now()
