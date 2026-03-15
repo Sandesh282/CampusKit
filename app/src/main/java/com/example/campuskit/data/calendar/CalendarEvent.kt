@@ -49,6 +49,9 @@ data class CalendarEvent(
  * @param color display color for attendance dots
  * @param datesAttended set of dates the student attended this course
  */
+/**
+ * Course attendance data for the calendar grid overlay.
+ */
 data class CourseInfo(
     val name: String,
     val color: Color,
@@ -56,6 +59,7 @@ data class CourseInfo(
 )
 
 /** Provides static mock calendar events and course data for first-launch demo. */
+/** Provides static mock calendar events and course data for demo. */
 object MockCalendarData {
 
     private val today: LocalDate = LocalDate.now()
