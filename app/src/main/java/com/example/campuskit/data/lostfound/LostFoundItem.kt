@@ -1,5 +1,23 @@
 package com.example.campuskit.data.lostfound
 
+/**
+ * Domain model for a lost-and-found item posting.
+ *
+ * Contact fields are nullable since a poster may only
+ * provide one or two contact methods.
+ *
+ * @param id unique identifier
+ * @param itemName name of the lost/found item
+ * @param foundLocation where the item was found
+ * @param imageUrls optional image URLs
+ * @param timestamp human-readable time string
+ */
+/**
+ * Domain model for a lost-and-found item posting.
+ *
+ * Contact fields are nullable since a poster may only
+ * provide one or two contact methods.
+ */
 data class LostFoundItem(
     val id: String,
     val itemName: String,
@@ -12,6 +30,7 @@ data class LostFoundItem(
     val description: String = "",
 )
 
+/** Provides hardcoded lost-and-found items for first-launch demo and seeding. */
 object MockLostFound {
     fun getItems(): List<LostFoundItem> = listOf(
         LostFoundItem(
