@@ -1,5 +1,19 @@
 package com.example.campuskit.data.events
 
+/**
+ * Domain model representing a campus event.
+ *
+ * @param id unique identifier
+ * @param title event title
+ * @param dateTime human-readable date/time string
+ * @param venue event location
+ * @param posterUrl optional poster image URL
+ * @param organizer club or committee name
+ * @param description optional event description
+ */
+/**
+ * Domain model representing a campus event.
+ */
 data class Event(
     val id: String,
     val title: String,
@@ -10,6 +24,7 @@ data class Event(
     val description: String = "",
 )
 
+/** Provides hardcoded campus events for first-launch demo and seeding. */
 object MockEvents {
     fun getEvents(): List<Event> = listOf(
         Event(
