@@ -26,6 +26,7 @@ moshi = "1.15.1"
 datastore = "1.1.1"
 generative-ai = "0.9.0"
 onnxruntime = "1.17.3"
+mediapipe = "0.10.14"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -72,6 +73,9 @@ generative-ai = { group = "com.google.ai.client.generativeai", name = "generativ
 
 # ONNX Runtime
 onnxruntime-android = { group = "com.microsoft.onnxruntime", name = "onnxruntime-android", version.ref = "onnxruntime" }
+
+# MediaPipe LLM Inference (on-device generation)
+mediapipe-tasks-genai = { group = "com.google.mediapipe", name = "tasks-genai", version.ref = "mediapipe" }
 
 # Retrofit & Moshi
 retrofit-core = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }

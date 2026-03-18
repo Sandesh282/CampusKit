@@ -96,6 +96,9 @@ dependencies {
     // ONNX Runtime (on-device embedding model inference)
     implementation(libs.onnxruntime.android)
 
+    // MediaPipe LLM Inference (on-device generation)
+    implementation(libs.mediapipe.tasks.genai)
+
     // Retrofit & Moshi
     implementation(libs.retrofit.core)
     implementation(libs.retrofit.converter.moshi)
