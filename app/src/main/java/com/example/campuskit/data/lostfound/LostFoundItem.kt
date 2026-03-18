@@ -31,6 +31,7 @@ data class LostFoundItem(
 )
 
 /** Provides hardcoded lost-and-found items for first-launch demo and seeding. */
+/** Provides hardcoded lost-and-found items for first-launch demo. */
 object MockLostFound {
     fun getItems(): List<LostFoundItem> = listOf(
         LostFoundItem(

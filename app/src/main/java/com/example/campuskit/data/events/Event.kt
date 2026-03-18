@@ -25,6 +25,7 @@ data class Event(
 )
 
 /** Provides hardcoded campus events for first-launch demo and seeding. */
+/** Provides hardcoded campus events for first-launch demo and seeding. */
 object MockEvents {
     fun getEvents(): List<Event> = listOf(
         Event(
