@@ -8,12 +8,17 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class LostFoundViewModel @Inject constructor(
     private val repository: LostFoundRepository
 ) : ViewModel() {
+
+    init {
+        viewModelScope.launch { repository.seedIfEmpty() }
+    }
 
     val items: StateFlow<List<LostFoundItem>> = repository.getItems().stateIn(
         viewModelScope,
@@ -22,6 +27,8 @@ class LostFoundViewModel @Inject constructor(
     )
 
     fun addItem(item: LostFoundItem) {
-        repository.addItem(item)
+        viewModelScope.launch {
+            repository.addItem(item)
+        }
     }
 }
