@@ -15,6 +15,12 @@ import com.example.campuskit.data.attendance.AttendanceDao
 import com.example.campuskit.data.attendance.AttendanceEntity
 import com.example.campuskit.data.attendance.TimetableDao
 import com.example.campuskit.data.attendance.TimetableEntity
+import com.example.campuskit.data.calendar.CalendarEventDao
+import com.example.campuskit.data.calendar.CalendarEventEntity
+import com.example.campuskit.data.events.EventDao
+import com.example.campuskit.data.events.EventEntity
+import com.example.campuskit.data.lostfound.LostFoundDao
+import com.example.campuskit.data.lostfound.LostFoundEntity
 import com.example.campuskit.data.mess.YuckItemDao
 import com.example.campuskit.data.mess.YuckItemEntity
 
@@ -27,8 +33,11 @@ import com.example.campuskit.data.mess.YuckItemEntity
         OfferingEntity::class,
         ResourceEntity::class,
         SyncMetadataEntity::class,
+        EventEntity::class,
+        LostFoundEntity::class,
+        CalendarEventEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -39,6 +48,9 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun offeringDao(): OfferingDao
     abstract fun resourceDao(): ResourceDao
     abstract fun syncMetadataDao(): SyncMetadataDao
+    abstract fun eventDao(): EventDao
+    abstract fun lostFoundDao(): LostFoundDao
+    abstract fun calendarEventDao(): CalendarEventDao
 
     companion object {
         @Volatile
