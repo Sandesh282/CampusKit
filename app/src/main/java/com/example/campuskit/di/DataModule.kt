@@ -4,6 +4,9 @@ import android.content.Context
 import com.example.campuskit.data.AppDatabase
 import com.example.campuskit.data.attendance.AttendanceDao
 import com.example.campuskit.data.attendance.TimetableDao
+import com.example.campuskit.data.calendar.CalendarEventDao
+import com.example.campuskit.data.events.EventDao
+import com.example.campuskit.data.lostfound.LostFoundDao
 import com.example.campuskit.data.mess.YuckItemDao
 import dagger.Module
 import dagger.Provides
@@ -50,5 +53,20 @@ object DataModule {
     @Provides
     fun provideSyncMetadataDao(database: AppDatabase): com.example.campuskit.data.academic.local.dao.SyncMetadataDao {
         return database.syncMetadataDao()
+    }
+
+    @Provides
+    fun provideEventDao(database: AppDatabase): EventDao {
+        return database.eventDao()
+    }
+
+    @Provides
+    fun provideLostFoundDao(database: AppDatabase): LostFoundDao {
+        return database.lostFoundDao()
+    }
+
+    @Provides
+    fun provideCalendarEventDao(database: AppDatabase): CalendarEventDao {
+        return database.calendarEventDao()
     }
 }
