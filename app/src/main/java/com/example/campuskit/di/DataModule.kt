@@ -3,6 +3,8 @@ package com.example.campuskit.di
 import android.content.Context
 import com.example.campuskit.data.AppDatabase
 import com.example.campuskit.data.assistant.embedding.ONNXEmbeddingService
+import com.example.campuskit.data.assistant.llm.LLMModelManager
+import com.example.campuskit.data.assistant.llm.MediaPipeLLMService
 import com.example.campuskit.data.assistant.vector.VectorChunkDao
 import com.example.campuskit.data.attendance.AttendanceDao
 import com.example.campuskit.data.attendance.TimetableDao
@@ -86,5 +88,22 @@ object DataModule {
     @Singleton
     fun provideOnnxEmbeddingService(@ApplicationContext context: Context): ONNXEmbeddingService {
         return ONNXEmbeddingService(context)
+    }
+
+    /** Provides [LLMModelManager] — singleton to track model download state. */
+    @Provides
+    @Singleton
+    fun provideLLMModelManager(@ApplicationContext context: Context): LLMModelManager {
+        return LLMModelManager(context)
+    }
+
+    /** Provides [MediaPipeLLMService] — singleton so the model loads once. */
+    @Provides
+    @Singleton
+    fun provideMediaPipeLLMService(
+        @ApplicationContext context: Context,
+        modelManager: LLMModelManager,
+    ): MediaPipeLLMService {
+        return MediaPipeLLMService(context, modelManager)
     }
 }

@@ -2,12 +2,16 @@ package com.example.campuskit.ui.assistant
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.campuskit.data.assistant.llm.LLMModelManager
+import com.example.campuskit.data.assistant.llm.ModelDownloadState
 import com.example.campuskit.domain.assistant.AskCampusAssistantUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -22,18 +26,34 @@ data class AssistantUiState(
     val isLoading: Boolean = false,
     val inputText: String = "",
     val error: String? = null,
+    val modelDownloadState: ModelDownloadState = ModelDownloadState.NotDownloaded,
 )
 
 @HiltViewModel
 class AssistantViewModel @Inject constructor(
     private val askCampusAssistant: AskCampusAssistantUseCase,
+    private val modelManager: LLMModelManager,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AssistantUiState())
     val uiState: StateFlow<AssistantUiState> = _uiState.asStateFlow()
 
+    init {
+        // Observe model download state and reflect it in UI state
+        modelManager.downloadState
+            .onEach { state ->
+                _uiState.value = _uiState.value.copy(modelDownloadState = state)
+            }
+            .launchIn(viewModelScope)
+    }
+
     fun onInputChanged(text: String) {
         _uiState.value = _uiState.value.copy(inputText = text, error = null)
+    }
+
+    /** Triggers model download via WorkManager. */
+    fun onDownloadModelClicked() {
+        modelManager.enqueueDownload()
     }
 
     fun sendMessage() {
