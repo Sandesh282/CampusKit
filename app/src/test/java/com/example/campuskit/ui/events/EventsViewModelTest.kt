@@ -2,14 +2,16 @@ package com.example.campuskit.ui.events
 
 import app.cash.turbine.test
 import com.example.campuskit.data.events.Event
+import com.example.campuskit.data.events.EventsRepository
 import com.example.campuskit.domain.events.FilterEventsUseCase
 import com.example.campuskit.utils.MainDispatcherRule
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -21,14 +23,17 @@ class EventsViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private lateinit var filterEventsUseCase: FilterEventsUseCase
+    private lateinit var repository: EventsRepository
     private lateinit var viewModel: EventsViewModel
 
     @Before
     fun setup() {
         filterEventsUseCase = mockk()
+        repository = mockk(relaxed = true)
         every { filterEventsUseCase() } returns flowOf(emptyList())
+        every { repository.getRemindedEventIds() } returns flowOf(emptyList())
 
-        viewModel = EventsViewModel(filterEventsUseCase)
+        viewModel = EventsViewModel(filterEventsUseCase, repository)
     }
 
     @Test
@@ -37,9 +42,8 @@ class EventsViewModelTest {
             Event("1", "Tech Talk", "Feb 15", "Room 1", "", "Coding Club", "")
         )
         every { filterEventsUseCase() } returns flowOf(mockEvents)
-        
-        // Re-initialize to pick up the mocked flow
-        viewModel = EventsViewModel(filterEventsUseCase)
+
+        viewModel = EventsViewModel(filterEventsUseCase, repository)
 
         viewModel.events.test {
             assertEquals(mockEvents, awaitItem())
@@ -54,28 +58,14 @@ class EventsViewModelTest {
     }
 
     @Test
-    fun toggleReminder_addsEventIdIfNotPresent() = runTest {
+    fun toggleReminder_delegatesToRepository() = runTest {
         viewModel.toggleReminder("event_1")
 
-        viewModel.remindedEvents.test {
-            val items = awaitItem()
-            assertTrue(items.contains("event_1"))
-            assertEquals(1, items.size)
-        }
+        coVerify { repository.toggleReminder("event_1") }
     }
 
     @Test
-    fun toggleReminder_removesEventIdIfPresent() = runTest {
-        // Add it first
-        viewModel.toggleReminder("event_1")
-        
-        // Remove it
-        viewModel.toggleReminder("event_1")
-
-        viewModel.remindedEvents.test {
-            val items = awaitItem()
-            assertFalse(items.contains("event_1"))
-            assertTrue(items.isEmpty())
-        }
+    fun seedIfEmpty_calledOnInit() = runTest {
+        coVerify { repository.seedIfEmpty() }
     }
 }
