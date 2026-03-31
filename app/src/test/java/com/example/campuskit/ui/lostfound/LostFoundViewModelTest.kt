@@ -4,9 +4,9 @@ import app.cash.turbine.test
 import com.example.campuskit.data.lostfound.LostFoundItem
 import com.example.campuskit.data.lostfound.LostFoundRepository
 import com.example.campuskit.utils.MainDispatcherRule
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -37,7 +37,6 @@ class LostFoundViewModelTest {
         )
         every { repository.getItems() } returns flowOf(mockData)
 
-        // Re-init viewmodel
         viewModel = LostFoundViewModel(repository)
 
         viewModel.items.test {
@@ -46,11 +45,16 @@ class LostFoundViewModelTest {
     }
 
     @Test
-    fun addItem_delegatesToRepository() {
+    fun addItem_delegatesToRepository() = runTest {
         val item = LostFoundItem("1", "Keys", "Lobby", emptyList(), "Now")
-        
+
         viewModel.addItem(item)
-        
-        verify(exactly = 1) { repository.addItem(item) }
+
+        coVerify { repository.addItem(item) }
+    }
+
+    @Test
+    fun seedIfEmpty_calledOnInit() = runTest {
+        coVerify { repository.seedIfEmpty() }
     }
 }
