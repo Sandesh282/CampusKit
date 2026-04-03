@@ -22,7 +22,7 @@ interface EventDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(events: List<EventEntity>)
 
-    /** Toggles the reminder flag for a given event. */
+    /** Toggles the [EventEntity.isReminded] flag for the event with the given [eventId]. */
     @Query("UPDATE events SET isReminded = NOT isReminded WHERE id = :eventId")
     suspend fun toggleReminder(eventId: String)
 
