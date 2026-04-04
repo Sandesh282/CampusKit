@@ -18,5 +18,6 @@ data class EventEntity(
     val posterUrl: String,
     val organizer: String,
     val description: String = "",
+    /** Whether the user has set a reminder for this event. */
     val isReminded: Boolean = false,
 )
