@@ -15,6 +15,7 @@ data class LostFoundEntity(
     @PrimaryKey val id: String,
     val itemName: String,
     val foundLocation: String,
+    /** Comma-separated image URLs. Empty string means no images. */
     val imageUrlsCsv: String = "",
     val timestamp: String,
     val contactWhatsApp: String? = null,
