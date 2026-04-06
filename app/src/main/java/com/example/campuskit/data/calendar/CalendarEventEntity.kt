@@ -17,6 +17,7 @@ data class CalendarEventEntity(
     val dateString: String,
     val startTimeString: String,
     val endTimeString: String,
+    /** ARGB integer representation of the event display color. */
     val colorArgb: Int,
     val assignee: String = "",
     val attendeeCount: Int = 0,
