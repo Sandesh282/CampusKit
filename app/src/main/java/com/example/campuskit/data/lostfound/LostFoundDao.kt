@@ -27,7 +27,7 @@ interface LostFoundDao {
     @Delete
     suspend fun delete(item: LostFoundEntity)
 
-    /** Returns the number of items currently stored. Used for seed check. */
+    /** Returns the total number of lost-and-found items. Used by [LostFoundRepository.seedIfEmpty]. */
     @Query("SELECT COUNT(*) FROM lost_found")
     suspend fun getCount(): Int
 }
