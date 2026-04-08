@@ -31,7 +31,7 @@ interface CalendarEventDao {
     @Delete
     suspend fun delete(event: CalendarEventEntity)
 
-    /** Returns the number of events currently stored. Used for seed check. */
+    /** Returns the total number of calendar events. Used by [CalendarRepository.seedIfEmpty]. */
     @Query("SELECT COUNT(*) FROM calendar_events")
     suspend fun getCount(): Int
 }
