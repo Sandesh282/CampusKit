@@ -32,7 +32,7 @@ class EventsRepository @Inject constructor(
     }
 }
 
-/** Maps [EventEntity] → domain [Event]. */
+/** Converts a Room [EventEntity] → domain [Event]. */
 private fun EventEntity.toDomain() = Event(
     id = id,
     title = title,
@@ -43,7 +43,7 @@ private fun EventEntity.toDomain() = Event(
     description = description,
 )
 
-/** Maps domain [Event] → [EventEntity]. */
+/** Converts a domain [Event] model into a Room [EventEntity] for persistence. → [EventEntity]. */
 private fun Event.toEntity() = EventEntity(
     id = id,
     title = title,
