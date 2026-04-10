@@ -29,7 +29,7 @@ class LostFoundRepository @Inject constructor(
     }
 }
 
-/** Maps [LostFoundEntity] → domain [LostFoundItem]. */
+/** Converts a Room [LostFoundEntity] → domain [LostFoundItem]. */
 private fun LostFoundEntity.toDomain() = LostFoundItem(
     id = id,
     itemName = itemName,
@@ -42,7 +42,7 @@ private fun LostFoundEntity.toDomain() = LostFoundItem(
     description = description,
 )
 
-/** Maps domain [LostFoundItem] → [LostFoundEntity]. */
+/** Converts a domain [LostFoundItem] into a Room [LostFoundEntity] for persistence. → [LostFoundEntity]. */
 private fun LostFoundItem.toEntity() = LostFoundEntity(
     id = id,
     itemName = itemName,
