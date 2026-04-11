@@ -51,7 +51,7 @@ class CalendarRepository @Inject constructor(
 
 // ── Mapping helpers ──
 
-/** Converts a [CalendarEventEntity] from Room into a domain [CalendarEvent]. */
+/** Converts a Room [CalendarEventEntity] into a domain [CalendarEvent]. */
 private fun CalendarEventEntity.toDomain() = CalendarEvent(
     id = id,
     title = title,
@@ -65,7 +65,7 @@ private fun CalendarEventEntity.toDomain() = CalendarEvent(
     description = description,
 )
 
-/** Converts a domain [CalendarEvent] into a [CalendarEventEntity] for Room. */
+/** Converts a domain [CalendarEvent] into a Room [CalendarEventEntity] for persistence. */
 private fun CalendarEvent.toEntity() = CalendarEventEntity(
     id = id,
     title = title,
