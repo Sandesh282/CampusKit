@@ -55,16 +55,19 @@ object DataModule {
         return database.syncMetadataDao()
     }
 
+    /** Provides [EventDao] for Hilt injection. */
     @Provides
     fun provideEventDao(database: AppDatabase): EventDao {
         return database.eventDao()
     }
 
+    /** Provides [LostFoundDao] for Hilt injection. */
     @Provides
     fun provideLostFoundDao(database: AppDatabase): LostFoundDao {
         return database.lostFoundDao()
     }
 
+    /** Provides [CalendarEventDao] for Hilt injection. */
     @Provides
     fun provideCalendarEventDao(database: AppDatabase): CalendarEventDao {
         return database.calendarEventDao()
