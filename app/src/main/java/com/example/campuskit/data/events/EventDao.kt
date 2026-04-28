@@ -33,4 +33,8 @@ interface EventDao {
     /** Returns the number of events currently stored. Used for seed check. */
     @Query("SELECT COUNT(*) FROM events")
     suspend fun getCount(): Int
+
+    /** Deletes the event with the given [eventId]. */
+    @Query("DELETE FROM events WHERE id = :eventId")
+    suspend fun deleteById(eventId: String)
 }

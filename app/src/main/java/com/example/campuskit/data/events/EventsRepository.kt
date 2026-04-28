@@ -30,6 +30,11 @@ class EventsRepository @Inject constructor(
             eventDao.insertAll(seedEntities)
         }
     }
+
+    /** Deletes the event with the given [eventId]. */
+    suspend fun deleteEvent(eventId: String) {
+        eventDao.deleteById(eventId)
+    }
 }
 
 /** Converts a Room [EventEntity] → domain [Event]. */
