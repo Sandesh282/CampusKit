@@ -5,7 +5,6 @@ import com.example.campuskit.data.events.Event
 import com.example.campuskit.data.events.EventsRepository
 import com.example.campuskit.domain.events.FilterEventsUseCase
 import com.example.campuskit.utils.MainDispatcherRule
-import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -30,7 +29,7 @@ class EventsViewModelTest {
     fun setup() {
         filterEventsUseCase = mockk()
         repository = mockk(relaxed = true)
-        every { filterEventsUseCase() } returns flowOf(emptyList())
+        every { filterEventsUseCase(any()) } returns flowOf(emptyList())
         every { repository.getRemindedEventIds() } returns flowOf(emptyList())
 
         viewModel = EventsViewModel(filterEventsUseCase, repository)
@@ -41,7 +40,7 @@ class EventsViewModelTest {
         val mockEvents = listOf(
             Event("1", "Tech Talk", "Feb 15", "Room 1", "", "Coding Club", "")
         )
-        every { filterEventsUseCase() } returns flowOf(mockEvents)
+        every { filterEventsUseCase(any()) } returns flowOf(mockEvents)
 
         viewModel = EventsViewModel(filterEventsUseCase, repository)
 
@@ -62,6 +61,22 @@ class EventsViewModelTest {
         viewModel.toggleReminder("event_1")
 
         coVerify { repository.toggleReminder("event_1") }
+    }
+
+    @Test
+    fun deleteEvent_delegatesToRepository() = runTest {
+        viewModel.deleteEvent("event_1")
+
+        coVerify { repository.deleteEvent("event_1") }
+    }
+
+    @Test
+    fun onSearchQueryChanged_updatesSearchQuery() = runTest {
+        assertEquals("", viewModel.searchQuery.value)
+
+        viewModel.onSearchQueryChanged("hackathon")
+
+        assertEquals("hackathon", viewModel.searchQuery.value)
     }
 
     @Test
