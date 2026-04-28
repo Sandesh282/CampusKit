@@ -4,7 +4,9 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -64,6 +66,7 @@ import com.example.campuskit.ui.theme.CardBackground
 import com.example.campuskit.ui.theme.SquircleShape
 import com.example.campuskit.ui.theme.SquircleShapeSmall
 import com.example.campuskit.ui.theme.StatusGreen
+import com.example.campuskit.ui.theme.StatusRed
 import com.example.campuskit.ui.theme.SurfaceVariant
 import com.example.campuskit.ui.theme.TextPrimary
 import com.example.campuskit.ui.theme.TextSecondary
@@ -73,6 +76,7 @@ import com.example.campuskit.ui.theme.TextTertiary
 fun LostFoundScreen(viewModel: LostFoundViewModel = hiltViewModel()) {
     val items by viewModel.items.collectAsState()
     var showPostDialog by remember { mutableStateOf(false) }
+    var itemToDelete by remember { mutableStateOf<LostFoundItem?>(null) }
     val context = LocalContext.current
 
     Scaffold(
@@ -133,6 +137,7 @@ fun LostFoundScreen(viewModel: LostFoundViewModel = hiltViewModel()) {
                             val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$number"))
                             context.startActivity(intent)
                         },
+                        onLongPress = { itemToDelete = item },
                     )
                 }
             }
@@ -156,6 +161,36 @@ fun LostFoundScreen(viewModel: LostFoundViewModel = hiltViewModel()) {
                     ),
                 )
                 showPostDialog = false
+            },
+        )
+    }
+
+    // Delete confirmation dialog
+    itemToDelete?.let { item ->
+        AlertDialog(
+            onDismissRequest = { itemToDelete = null },
+            containerColor = CardBackground,
+            title = {
+                Text("Delete Item", color = TextPrimary, fontWeight = FontWeight.Bold)
+            },
+            text = {
+                Text(
+                    "Are you sure you want to delete \"${item.itemName}\"?",
+                    color = TextSecondary,
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.deleteItem(item.id)
+                    itemToDelete = null
+                }) {
+                    Text("Delete", color = StatusRed, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { itemToDelete = null }) {
+                    Text("Cancel", color = TextSecondary)
+                }
             },
         )
     }
@@ -192,6 +227,7 @@ private fun EmptyLostFoundPlaceholder() {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun AnimatedLostFoundCard(
     item: LostFoundItem,
@@ -199,6 +235,7 @@ private fun AnimatedLostFoundCard(
     onWhatsApp: (String) -> Unit,
     onTelegram: (String) -> Unit,
     onPhone: (String) -> Unit,
+    onLongPress: () -> Unit,
 ) {
     val animProgress = remember { Animatable(0f) }
 
@@ -217,7 +254,11 @@ private fun AnimatedLostFoundCard(
             .graphicsLayer {
                 alpha = animProgress.value
                 translationY = (1f - animProgress.value) * 40f
-            },
+            }
+            .combinedClickable(
+                onClick = {},
+                onLongClick = onLongPress,
+            ),
     ) {
         LostFoundCard(
             item = item,
