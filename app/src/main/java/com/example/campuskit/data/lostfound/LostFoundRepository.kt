@@ -27,6 +27,11 @@ class LostFoundRepository @Inject constructor(
             lostFoundDao.insertAll(seedEntities)
         }
     }
+
+    /** Deletes the item with the given [itemId]. */
+    suspend fun deleteItem(itemId: String) {
+        lostFoundDao.deleteById(itemId)
+    }
 }
 
 /** Converts a Room [LostFoundEntity] → domain [LostFoundItem]. */

@@ -31,4 +31,10 @@ class LostFoundViewModel @Inject constructor(
             repository.addItem(item)
         }
     }
+
+    fun deleteItem(itemId: String) {
+        viewModelScope.launch {
+            repository.deleteItem(itemId)
+        }
+    }
 }

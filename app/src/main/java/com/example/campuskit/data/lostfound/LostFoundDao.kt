@@ -30,4 +30,8 @@ interface LostFoundDao {
     /** Returns the total number of lost-and-found items. Used by [LostFoundRepository.seedIfEmpty]. */
     @Query("SELECT COUNT(*) FROM lost_found")
     suspend fun getCount(): Int
+
+    /** Deletes the item with the given [itemId]. */
+    @Query("DELETE FROM lost_found WHERE id = :itemId")
+    suspend fun deleteById(itemId: String)
 }
