@@ -54,6 +54,13 @@ class LostFoundViewModelTest {
     }
 
     @Test
+    fun deleteItem_delegatesToRepository() = runTest {
+        viewModel.deleteItem("item_1")
+
+        coVerify { repository.deleteItem("item_1") }
+    }
+
+    @Test
     fun seedIfEmpty_calledOnInit() = runTest {
         coVerify { repository.seedIfEmpty() }
     }
