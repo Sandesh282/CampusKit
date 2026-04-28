@@ -3,7 +3,9 @@ package com.example.campuskit.ui.events
 import android.widget.Toast
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,25 +23,34 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.EventBusy
 import androidx.compose.material.icons.outlined.NotificationsNone
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -55,6 +66,8 @@ import com.example.campuskit.ui.theme.Black
 import com.example.campuskit.ui.theme.CardBackground
 import com.example.campuskit.ui.theme.SquircleShape
 import com.example.campuskit.ui.theme.StatusGreen
+import com.example.campuskit.ui.theme.StatusRed
+import com.example.campuskit.ui.theme.SurfaceVariant
 import com.example.campuskit.ui.theme.TextPrimary
 import com.example.campuskit.ui.theme.TextSecondary
 import com.example.campuskit.ui.theme.TextTertiary
@@ -63,6 +76,9 @@ import com.example.campuskit.ui.theme.TextTertiary
 fun EventsScreen(viewModel: EventsViewModel = hiltViewModel()) {
     val events by viewModel.events.collectAsState()
     val remindedEvents by viewModel.remindedEvents.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
+
+    var eventToDelete by remember { mutableStateOf<Event?>(null) }
 
     Scaffold(containerColor = Black) { padding ->
         LazyColumn(
@@ -86,12 +102,45 @@ fun EventsScreen(viewModel: EventsViewModel = hiltViewModel()) {
                     style = MaterialTheme.typography.bodyMedium,
                     color = TextTertiary,
                 )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Search bar
+                TextField(
+                    value = searchQuery,
+                    onValueChange = { viewModel.onSearchQueryChanged(it) },
+                    placeholder = {
+                        Text("Search events...", color = TextTertiary, fontSize = 15.sp)
+                    },
+                    leadingIcon = {
+                        Icon(Icons.Filled.Search, contentDescription = null, tint = TextSecondary)
+                    },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { viewModel.onSearchQueryChanged("") }) {
+                                Icon(Icons.Filled.Close, contentDescription = "Clear", tint = TextSecondary)
+                            }
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(SquircleShape),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = CardBackground,
+                        unfocusedContainerColor = CardBackground,
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary,
+                        cursorColor = AccentBlue,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                    ),
+                    singleLine = true,
+                )
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
             if (events.isEmpty()) {
                 item {
-                    EmptyEventsPlaceholder()
+                    EmptyEventsPlaceholder(hasSearchQuery = searchQuery.isNotBlank())
                 }
             } else {
                 itemsIndexed(events, key = { _, event -> event.id }) { index, event ->
@@ -100,6 +149,7 @@ fun EventsScreen(viewModel: EventsViewModel = hiltViewModel()) {
                         index = index,
                         isReminded = event.id in remindedEvents,
                         onToggleReminder = { viewModel.toggleReminder(event.id) },
+                        onLongPress = { eventToDelete = event },
                     )
                 }
             }
@@ -107,10 +157,40 @@ fun EventsScreen(viewModel: EventsViewModel = hiltViewModel()) {
             item { Spacer(modifier = Modifier.height(80.dp)) }
         }
     }
+
+    // Delete confirmation dialog
+    eventToDelete?.let { event ->
+        AlertDialog(
+            onDismissRequest = { eventToDelete = null },
+            containerColor = CardBackground,
+            title = {
+                Text("Delete Event", color = TextPrimary, fontWeight = FontWeight.Bold)
+            },
+            text = {
+                Text(
+                    "Are you sure you want to delete \"${event.title}\"?",
+                    color = TextSecondary,
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.deleteEvent(event.id)
+                    eventToDelete = null
+                }) {
+                    Text("Delete", color = StatusRed, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { eventToDelete = null }) {
+                    Text("Cancel", color = TextSecondary)
+                }
+            },
+        )
+    }
 }
 
 @Composable
-private fun EmptyEventsPlaceholder() {
+private fun EmptyEventsPlaceholder(hasSearchQuery: Boolean = false) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -125,14 +205,15 @@ private fun EmptyEventsPlaceholder() {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "No events yet",
+            text = if (hasSearchQuery) "No matching events" else "No events yet",
             style = MaterialTheme.typography.titleMedium,
             color = TextSecondary,
             fontWeight = FontWeight.SemiBold,
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = "Campus events will appear here\nwhen they're posted",
+            text = if (hasSearchQuery) "Try a different search term"
+                   else "Campus events will appear here\nwhen they're posted",
             style = MaterialTheme.typography.bodySmall,
             color = TextTertiary,
             textAlign = TextAlign.Center,
@@ -140,12 +221,14 @@ private fun EmptyEventsPlaceholder() {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun AnimatedEventCard(
     event: Event,
     index: Int,
     isReminded: Boolean,
     onToggleReminder: () -> Unit,
+    onLongPress: () -> Unit,
 ) {
     val animProgress = remember { Animatable(0f) }
 
@@ -164,7 +247,11 @@ private fun AnimatedEventCard(
             .graphicsLayer {
                 alpha = animProgress.value
                 translationY = (1f - animProgress.value) * 40f
-            },
+            }
+            .combinedClickable(
+                onClick = {},
+                onLongClick = onLongPress,
+            ),
     ) {
         EventCard(
             event = event,
