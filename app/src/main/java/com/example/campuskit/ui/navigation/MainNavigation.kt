@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -245,8 +246,17 @@ fun MainNavigation() {
             onDismissRequest = { showAssistant = false },
             sheetState = assistantSheetState,
             containerColor = Black,
-            dragHandle = null,
-            modifier = Modifier.fillMaxSize(),
+            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+            dragHandle = {
+                Box(
+                    modifier = Modifier
+                        .padding(top = 10.dp, bottom = 6.dp)
+                        .size(width = 36.dp, height = 4.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.2f)),
+                )
+            },
+            modifier = Modifier.fillMaxHeight(0.93f),
         ) {
             AssistantContent(
                 uiState = uiState,

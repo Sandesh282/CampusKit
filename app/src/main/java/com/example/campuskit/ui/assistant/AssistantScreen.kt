@@ -46,6 +46,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -54,17 +55,35 @@ import com.example.campuskit.ui.theme.AccentBlue
 import com.example.campuskit.ui.theme.AccentPurple
 import com.example.campuskit.ui.theme.Black
 import com.example.campuskit.ui.theme.CardBackground
+import com.example.campuskit.ui.theme.CampusKitTheme
 import com.example.campuskit.ui.theme.Surface
 import com.example.campuskit.ui.theme.SurfaceVariant
 import com.example.campuskit.ui.theme.TextPrimary
 import com.example.campuskit.ui.theme.TextSecondary
 import com.example.campuskit.ui.theme.TextTertiary
 
+// ── Stateful entry point (requires Hilt) ──────────────────────────────────────
+
 @Composable
 fun AssistantScreen(
     viewModel: AssistantViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    AssistantContent(
+        uiState = uiState,
+        onInputChanged = viewModel::onInputChanged,
+        onSend = viewModel::sendMessage,
+    )
+}
+
+// ── Stateless content (previewable) ───────────────────────────────────────────
+
+@Composable
+fun AssistantContent(
+    uiState: AssistantUiState,
+    onInputChanged: (String) -> Unit,
+    onSend: () -> Unit,
+) {
     val listState = rememberLazyListState()
 
     // Auto-scroll to the latest message
@@ -80,10 +99,38 @@ fun AssistantScreen(
             .background(Black)
             .imePadding(),
     ) {
-        // Header
-        AssistantHeader()
+        // Compact inline title (sits below the sheet's drag handle)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(AccentPurple.copy(alpha = 0.18f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(text = "AI", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = AccentPurple)
+            }
+            Spacer(modifier = Modifier.width(10.dp))
+            Column {
+                Text(
+                    text = "Campus Assistant",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = TextPrimary,
+                )
+                Text(
+                    text = "Powered by Gemini",
+                    fontSize = 10.sp,
+                    color = TextTertiary,
+                )
+            }
+        }
 
-        // Messages list
         if (uiState.messages.isEmpty()) {
             WelcomePrompt(modifier = Modifier.weight(1f))
         } else {
@@ -96,7 +143,6 @@ fun AssistantScreen(
                 items(uiState.messages) { message ->
                     MessageBubble(message = message)
                 }
-                // Typing indicator while waiting for first token
                 item {
                     AnimatedVisibility(
                         visible = uiState.isLoading && uiState.messages.lastOrNull()?.text?.isEmpty() == true,
@@ -109,55 +155,24 @@ fun AssistantScreen(
             }
         }
 
-        // Input bar
         ChatInputBar(
             value = uiState.inputText,
-            onValueChange = viewModel::onInputChanged,
-            onSend = viewModel::sendMessage,
+            onValueChange = onInputChanged,
+            onSend = onSend,
             isLoading = uiState.isLoading,
         )
     }
 }
 
-@Composable
-private fun AssistantHeader() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Surface)
-            .padding(horizontal = 20.dp, vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(
-            modifier = Modifier
-                .size(38.dp)
-                .clip(CircleShape)
-                .background(AccentPurple.copy(alpha = 0.18f)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(text = "AI", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = AccentPurple)
-        }
-        Spacer(modifier = Modifier.width(12.dp))
-        Column {
-            Text(
-                text = "Campus Assistant",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = TextPrimary,
-            )
-            Text(
-                text = "Powered by Gemini",
-                fontSize = 11.sp,
-                color = TextTertiary,
-            )
-        }
-    }
-}
+// ── Sub-composables ───────────────────────────────────────────────────────────
+
 
 @Composable
 private fun WelcomePrompt(modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier.fillMaxWidth().padding(32.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -190,7 +205,6 @@ private fun WelcomePrompt(modifier: Modifier = Modifier) {
 @Composable
 private fun MessageBubble(message: ChatMessage) {
     val isUser = message.isUser
-
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start,
@@ -287,9 +301,7 @@ private fun ChatInputBar(
             maxLines = 4,
             singleLine = false,
         )
-
         Spacer(modifier = Modifier.width(8.dp))
-
         IconButton(
             onClick = onSend,
             enabled = value.isNotBlank() && !isLoading,
@@ -305,5 +317,57 @@ private fun ChatInputBar(
                 modifier = Modifier.size(20.dp),
             )
         }
+    }
+}
+
+// ── Previews ──────────────────────────────────────────────────────────────────
+
+@Preview(showBackground = true, name = "Welcome state")
+@Composable
+private fun PreviewAssistantEmpty() {
+    CampusKitTheme {
+        AssistantContent(
+            uiState = AssistantUiState(),
+            onInputChanged = {},
+            onSend = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Conversation in progress")
+@Composable
+private fun PreviewAssistantConversation() {
+    CampusKitTheme {
+        AssistantContent(
+            uiState = AssistantUiState(
+                messages = listOf(
+                    ChatMessage("Am I safe to bunk COA tomorrow?", isUser = true),
+                    ChatMessage("Yes! You've attended 20 out of 30 COA classes (66%). Your minimum is 75%, which means you need 2 more bunks before you drop below. You have 2 safe bunks remaining.", isUser = false),
+                    ChatMessage("What's for dinner today?", isUser = true),
+                    ChatMessage("Tonight's dinner is Arahar Dal Fry, Aaloo Patta Gobhi, Roti, Rice, and Salad. Enjoy!", isUser = false),
+                ),
+                inputText = "Are there any events this week?",
+            ),
+            onInputChanged = {},
+            onSend = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Typing indicator")
+@Composable
+private fun PreviewAssistantLoading() {
+    CampusKitTheme {
+        AssistantContent(
+            uiState = AssistantUiState(
+                messages = listOf(
+                    ChatMessage("What events are happening this weekend?", isUser = true),
+                    ChatMessage("", isUser = false), // empty = typing indicator shows
+                ),
+                isLoading = true,
+            ),
+            onInputChanged = {},
+            onSend = {},
+        )
     }
 }
