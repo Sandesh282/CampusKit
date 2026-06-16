@@ -30,11 +30,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Cottage
 import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material.icons.filled.LunchDining
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.Cottage
 import androidx.compose.material.icons.outlined.ConfirmationNumber
@@ -62,6 +64,7 @@ import androidx.compose.ui.unit.sp
 import com.example.campuskit.ui.academic.NotesListScreen
 import com.example.campuskit.ui.academic.PdfViewerScreen
 import com.example.campuskit.ui.academic.QuestionPapersListScreen
+import com.example.campuskit.ui.assistant.AssistantScreen
 import com.example.campuskit.ui.calendar.CalendarScreen
 import com.example.campuskit.ui.events.EventsScreen
 import com.example.campuskit.ui.home.HomeScreen
@@ -85,6 +88,7 @@ val tabs = listOf(
     TabItem("Events", Icons.Filled.ConfirmationNumber, Icons.Outlined.ConfirmationNumber),
     TabItem("Lost", Icons.Filled.Search, Icons.Outlined.Search),
     TabItem("Calendar", Icons.Filled.CalendarToday, Icons.Outlined.CalendarToday),
+    TabItem("AI", Icons.Filled.AutoAwesome, Icons.Outlined.AutoAwesome),
 )
 
 // Sub-navigation state for screens that slide over Home
@@ -186,6 +190,7 @@ sealed class SubScreen {
                 2 -> EventsScreen()
                 3 -> LostFoundScreen()
                 4 -> CalendarScreen()
+                5 -> AssistantScreen()
             }
         }
 
