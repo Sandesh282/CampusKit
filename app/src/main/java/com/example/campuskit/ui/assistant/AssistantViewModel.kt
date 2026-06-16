@@ -53,8 +53,17 @@ class AssistantViewModel @Inject constructor(
         viewModelScope.launch {
             askCampusAssistant(query)
                 .catch { e ->
-                    // Replace the placeholder with an error message
-                    updateLastAssistantMessage("Sorry, something went wrong. Please try again.")
+                    val errorMsg = when {
+                        e.message?.contains("API_KEY", ignoreCase = true) == true ||
+                        e.message?.contains("403", ignoreCase = true) == true ||
+                        e.message?.contains("401", ignoreCase = true) == true ->
+                            "Invalid API key. Add a valid Gemini key to local.properties."
+                        e.message?.contains("network", ignoreCase = true) == true ||
+                        e.message?.contains("UnknownHost", ignoreCase = true) == true ->
+                            "No internet connection. Check your network."
+                        else -> "Error: ${e.message ?: "Unknown error"}"
+                    }
+                    updateLastAssistantMessage(errorMsg)
                     _uiState.value = _uiState.value.copy(isLoading = false)
                 }
                 .collect { token ->
