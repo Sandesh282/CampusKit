@@ -18,6 +18,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "com.example.campuskit.HiltTestRunner"
+
+        val geminiKey = project.findProperty("GEMINI_API_KEY")?.toString() ?: ""
+        buildConfigField("String", "GEMINI_API_KEY", "\"$geminiKey\"")
     }
 
     buildTypes {
@@ -38,6 +41,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -77,6 +81,9 @@ dependencies {
 
     // Image loading
     implementation(libs.coil.compose)
+
+    // Gemini AI
+    implementation(libs.generative.ai)
 
     // Retrofit & Moshi
     implementation(libs.retrofit.core)
