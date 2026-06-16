@@ -1,6 +1,7 @@
 package com.example.campuskit.ui.navigation
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
@@ -9,6 +10,8 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
@@ -28,27 +31,33 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Cottage
 import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material.icons.filled.LunchDining
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.Cottage
 import androidx.compose.material.icons.outlined.ConfirmationNumber
 import androidx.compose.material.icons.outlined.LunchDining
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -56,6 +65,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -64,17 +74,22 @@ import androidx.compose.ui.unit.sp
 import com.example.campuskit.ui.academic.NotesListScreen
 import com.example.campuskit.ui.academic.PdfViewerScreen
 import com.example.campuskit.ui.academic.QuestionPapersListScreen
-import com.example.campuskit.ui.assistant.AssistantScreen
+import com.example.campuskit.ui.assistant.AssistantContent
+import com.example.campuskit.ui.assistant.AssistantViewModel
 import com.example.campuskit.ui.calendar.CalendarScreen
 import com.example.campuskit.ui.events.EventsScreen
 import com.example.campuskit.ui.home.HomeScreen
 import com.example.campuskit.ui.lostfound.LostFoundScreen
 import com.example.campuskit.ui.mess.MessScreen
 import com.example.campuskit.ui.theme.AccentBlue
+import com.example.campuskit.ui.theme.AccentPurple
 import com.example.campuskit.ui.theme.Black
 import com.example.campuskit.ui.theme.NavBarDockBackground
 import com.example.campuskit.ui.theme.NavBarUnselected
 import com.example.campuskit.ui.theme.TextPrimary
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
 
 data class TabItem(
     val label: String,
@@ -88,7 +103,6 @@ val tabs = listOf(
     TabItem("Events", Icons.Filled.ConfirmationNumber, Icons.Outlined.ConfirmationNumber),
     TabItem("Lost", Icons.Filled.Search, Icons.Outlined.Search),
     TabItem("Calendar", Icons.Filled.CalendarToday, Icons.Outlined.CalendarToday),
-    TabItem("AI", Icons.Filled.AutoAwesome, Icons.Outlined.AutoAwesome),
 )
 
 // Sub-navigation state for screens that slide over Home
@@ -99,98 +113,100 @@ sealed class SubScreen {
     data class PdfViewer(val url: String, val title: String) : SubScreen()
 }
 
-    @Composable
-    fun MainNavigation() {
-        var selectedTab by rememberSaveable { mutableIntStateOf(0) }
-        var subScreenStack by remember { mutableStateOf<List<SubScreen>>(emptyList()) }
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MainNavigation() {
+    var selectedTab by rememberSaveable { mutableIntStateOf(0) }
+    var subScreenStack by remember { mutableStateOf<List<SubScreen>>(emptyList()) }
+    var showAssistant by remember { mutableStateOf(false) }
+    val assistantSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val scope = rememberCoroutineScope()
 
-        val currentSubScreen = subScreenStack.lastOrNull() ?: SubScreen.None
+    val currentSubScreen = subScreenStack.lastOrNull() ?: SubScreen.None
 
-        fun push(screen: SubScreen) {
-            subScreenStack = subScreenStack + screen
+    // Hide bubble when user is in a full-screen sub-navigation (QP, Notes, PDF)
+    val showBubble = subScreenStack.isEmpty()
+
+    fun push(screen: SubScreen) {
+        subScreenStack = subScreenStack + screen
+    }
+
+    fun pop() {
+        if (subScreenStack.isNotEmpty()) {
+            subScreenStack = subScreenStack.dropLast(1)
         }
+    }
 
-        fun pop() {
-            if (subScreenStack.isNotEmpty()) {
-                subScreenStack = subScreenStack.dropLast(1)
-            }
-        }
-
-        Box(
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Black),
+    ) {
+        // Screen content
+        AnimatedContent(
+            targetState = selectedTab,
             modifier = Modifier
                 .fillMaxSize()
-                .background(Black),
-        ) {
-            // Screen content
-            AnimatedContent(
-                targetState = selectedTab,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = 96.dp),
-                transitionSpec = {
-                    val direction = if (targetState > initialState) 1 else -1
-                    (fadeIn(tween(250, easing = FastOutSlowInEasing)) +
-                        slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { direction * 40 })
-                        .togetherWith(
-                            fadeOut(tween(200, easing = FastOutSlowInEasing)) +
-                                slideOutHorizontally(tween(250, easing = FastOutSlowInEasing)) { -direction * 40 },
-                        )
-                },
-                label = "tabContent",
-            ) { tab ->
-                when (tab) {
-                    0 -> {
-                        AnimatedContent(
-                            targetState = currentSubScreen,
-                            transitionSpec = {
-                                if (targetState != SubScreen.None && initialState == SubScreen.None) {
-                                    // Pushing first subscreen over Home
-                                    (slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { it })
-                                        .togetherWith(fadeOut(tween(300)))
-                                } else if (targetState == SubScreen.None && initialState != SubScreen.None) {
-                                    // Popping back to Home
-                                    fadeIn(tween(300))
-                                        .togetherWith(slideOutHorizontally(tween(300, easing = FastOutSlowInEasing)) { it })
-                                } else if (targetState is SubScreen.PdfViewer) {
-                                    // Pushing PDF over another subscreen
-                                    (slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { it })
-                                        .togetherWith(slideOutHorizontally(tween(300, easing = FastOutSlowInEasing)) { -it / 3 })
-                                } else {
-                                    // Popping PDF back to subscreen
-                                    (slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { -it / 3 })
-                                        .togetherWith(slideOutHorizontally(tween(300, easing = FastOutSlowInEasing)) { it })
-                                }
-                            },
-                            label = "subScreenTransition"
-                        ) { screen ->
-                            when (screen) {
-                                is SubScreen.QuestionPapers -> QuestionPapersListScreen(
-                                    subjectCode = screen.subjectCode,
-                                    onBack = { pop() },
-                                    onOpenPdf = { url, title -> push(SubScreen.PdfViewer(url, title)) }
-                                )
-                                is SubScreen.Notes -> NotesListScreen(
-                                    subjectCode = screen.subjectCode,
-                                    onBack = { pop() },
-                                    onOpenPdf = { url, title -> push(SubScreen.PdfViewer(url, title)) }
-                                )
-                                is SubScreen.PdfViewer -> PdfViewerScreen(
-                                    url = screen.url,
-                                    title = screen.title,
-                                    onBack = { pop() }
-                                )
-                                SubScreen.None -> HomeScreen(
-                                    onNavigateToQuestionPapers = { code -> push(SubScreen.QuestionPapers(code)) },
-                                    onNavigateToNotes = { code -> push(SubScreen.Notes(code)) },
-                                )
+                .padding(bottom = 96.dp),
+            transitionSpec = {
+                val direction = if (targetState > initialState) 1 else -1
+                (fadeIn(tween(250, easing = FastOutSlowInEasing)) +
+                    slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { direction * 40 })
+                    .togetherWith(
+                        fadeOut(tween(200, easing = FastOutSlowInEasing)) +
+                            slideOutHorizontally(tween(250, easing = FastOutSlowInEasing)) { -direction * 40 },
+                    )
+            },
+            label = "tabContent",
+        ) { tab ->
+            when (tab) {
+                0 -> {
+                    AnimatedContent(
+                        targetState = currentSubScreen,
+                        transitionSpec = {
+                            if (targetState != SubScreen.None && initialState == SubScreen.None) {
+                                (slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { it })
+                                    .togetherWith(fadeOut(tween(300)))
+                            } else if (targetState == SubScreen.None && initialState != SubScreen.None) {
+                                fadeIn(tween(300))
+                                    .togetherWith(slideOutHorizontally(tween(300, easing = FastOutSlowInEasing)) { it })
+                            } else if (targetState is SubScreen.PdfViewer) {
+                                (slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { it })
+                                    .togetherWith(slideOutHorizontally(tween(300, easing = FastOutSlowInEasing)) { -it / 3 })
+                            } else {
+                                (slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { -it / 3 })
+                                    .togetherWith(slideOutHorizontally(tween(300, easing = FastOutSlowInEasing)) { it })
                             }
+                        },
+                        label = "subScreenTransition"
+                    ) { screen ->
+                        when (screen) {
+                            is SubScreen.QuestionPapers -> QuestionPapersListScreen(
+                                subjectCode = screen.subjectCode,
+                                onBack = { pop() },
+                                onOpenPdf = { url, title -> push(SubScreen.PdfViewer(url, title)) }
+                            )
+                            is SubScreen.Notes -> NotesListScreen(
+                                subjectCode = screen.subjectCode,
+                                onBack = { pop() },
+                                onOpenPdf = { url, title -> push(SubScreen.PdfViewer(url, title)) }
+                            )
+                            is SubScreen.PdfViewer -> PdfViewerScreen(
+                                url = screen.url,
+                                title = screen.title,
+                                onBack = { pop() }
+                            )
+                            SubScreen.None -> HomeScreen(
+                                onNavigateToQuestionPapers = { code -> push(SubScreen.QuestionPapers(code)) },
+                                onNavigateToNotes = { code -> push(SubScreen.Notes(code)) },
+                            )
                         }
                     }
+                }
                 1 -> MessScreen()
                 2 -> EventsScreen()
                 3 -> LostFoundScreen()
                 4 -> CalendarScreen()
-                5 -> AssistantScreen()
             }
         }
 
@@ -204,6 +220,72 @@ sealed class SubScreen {
             selectedTab = selectedTab,
             onTabSelected = { selectedTab = it },
             modifier = Modifier.align(Alignment.BottomCenter),
+        )
+
+        // AI floating bubble — bottom-left, above nav bar, hidden on sub-screens
+        AnimatedVisibility(
+            visible = showBubble,
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(start = 24.dp, bottom = 104.dp)
+                .navigationBarsPadding(),
+            enter = scaleIn(spring(dampingRatio = 0.5f, stiffness = Spring.StiffnessMedium)) + fadeIn(),
+            exit = scaleOut(tween(150)) + fadeOut(tween(150)),
+        ) {
+            AiFloatingBubble(onClick = { showAssistant = true })
+        }
+    }
+
+    // Assistant bottom sheet
+    if (showAssistant) {
+        val assistantViewModel: AssistantViewModel = hiltViewModel()
+        val uiState by assistantViewModel.uiState.collectAsStateWithLifecycle()
+
+        ModalBottomSheet(
+            onDismissRequest = { showAssistant = false },
+            sheetState = assistantSheetState,
+            containerColor = Black,
+            dragHandle = null,
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            AssistantContent(
+                uiState = uiState,
+                onInputChanged = assistantViewModel::onInputChanged,
+                onSend = assistantViewModel::sendMessage,
+            )
+        }
+    }
+}
+
+@Composable
+private fun AiFloatingBubble(onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(48.dp)
+            .shadow(
+                elevation = 12.dp,
+                shape = CircleShape,
+                ambientColor = AccentPurple,
+                spotColor = AccentPurple,
+            )
+            .clip(CircleShape)
+            .background(
+                brush = Brush.radialGradient(
+                    colors = listOf(AccentPurple, AccentBlue.copy(alpha = 0.85f)),
+                )
+            )
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onClick,
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = Icons.Filled.AutoAwesome,
+            contentDescription = "Open Campus Assistant",
+            tint = Color.White,
+            modifier = Modifier.size(22.dp),
         )
     }
 }
