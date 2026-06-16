@@ -4,7 +4,7 @@
 
 ### The Intelligent Campus Companion for Android
 
-**A beautifully crafted, feature-rich Android application that reimagines the campus experience — built with love ❤️ for college students.**
+**A beautifully crafted, feature-rich Android application that reimagines the campus experience, built with love ❤️ for college students.**
 
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.0-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org)
 [![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-Material3-4285F4?logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
@@ -257,7 +257,7 @@ cd CampusKit
 ./gradlew connectedAndroidTest  # Instrumented tests (requires emulator/device)
 ```
 
-## Roadmap
+## Future Additions
 
 - [ ] **On-device RAG Pipeline** — Embedded vector database powering an AI campus assistant with LLM inference directly on the edge for zero-latency, network-independent responses
 - [ ] **Timetable Auto-Sync** — Automatic class schedule import and smart attendance reminders
