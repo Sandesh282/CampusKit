@@ -52,6 +52,8 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale
+import com.example.campuskit.ui.components.EmptyStateView
+import androidx.compose.material.icons.outlined.CalendarMonth
 
 @Composable
 fun CalendarGridView(viewModel: CalendarViewModel) {
@@ -89,6 +91,22 @@ fun CalendarGridView(viewModel: CalendarViewModel) {
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp, vertical = 16.dp),
     ) {
+        if (courses.isEmpty()) {
+            EmptyStateView(
+                icon = Icons.Outlined.CalendarMonth,
+                message = "Your calendar is empty.\nAdd a course to start tracking your schedule."
+            )
+        } else {
+            // Keep all the existing UI inside this 'else' block!
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Keep Track Of Your\nCourse Calendar",
+                // ... (the rest of the calendar rendering code goes here)
+            )
+            // ...
+            Spacer(modifier = Modifier.height(100.dp))
+        }
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(

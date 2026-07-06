@@ -71,6 +71,7 @@ import com.example.campuskit.ui.theme.SurfaceVariant
 import com.example.campuskit.ui.theme.TextPrimary
 import com.example.campuskit.ui.theme.TextSecondary
 import com.example.campuskit.ui.theme.TextTertiary
+import com.example.campuskit.ui.components.EmptyStateView
 
 @Composable
 fun EventsScreen(viewModel: EventsViewModel = hiltViewModel()) {
@@ -140,7 +141,12 @@ fun EventsScreen(viewModel: EventsViewModel = hiltViewModel()) {
 
             if (events.isEmpty()) {
                 item {
-                    EmptyEventsPlaceholder(hasSearchQuery = searchQuery.isNotBlank())
+                    val hasSearch = searchQuery.isNotBlank()
+                    EmptyStateView(
+                        icon = if (hasSearch) Icons.Filled.Search else Icons.Outlined.EventBusy,
+                        message = if (hasSearch) "No matching events.\nTry a different search term."
+                        else "No events yet.\nEvents will appear here when they're posted."
+                    )
                 }
             } else {
                 itemsIndexed(events, key = { _, event -> event.id }) { index, event ->
@@ -189,7 +195,7 @@ fun EventsScreen(viewModel: EventsViewModel = hiltViewModel()) {
     }
 }
 
-@Composable
+/*@Composable
 private fun EmptyEventsPlaceholder(hasSearchQuery: Boolean = false) {
     Column(
         modifier = Modifier
@@ -219,7 +225,7 @@ private fun EmptyEventsPlaceholder(hasSearchQuery: Boolean = false) {
             textAlign = TextAlign.Center,
         )
     }
-}
+}*/
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

@@ -71,6 +71,7 @@ import com.example.campuskit.ui.theme.SurfaceVariant
 import com.example.campuskit.ui.theme.TextPrimary
 import com.example.campuskit.ui.theme.TextSecondary
 import com.example.campuskit.ui.theme.TextTertiary
+import com.example.campuskit.ui.components.EmptyStateView
 
 @Composable
 fun LostFoundScreen(viewModel: LostFoundViewModel = hiltViewModel()) {
@@ -118,7 +119,10 @@ fun LostFoundScreen(viewModel: LostFoundViewModel = hiltViewModel()) {
 
             if (items.isEmpty()) {
                 item {
-                    EmptyLostFoundPlaceholder()
+                    EmptyStateView(
+                        icon = Icons.Outlined.Inventory2,
+                        message = "Nothing here yet.\nFound something on campus? Tap + to help someone find it."
+                    )
                 }
             } else {
                 itemsIndexed(items, key = { _, item -> item.id }) { index, item ->
@@ -196,7 +200,7 @@ fun LostFoundScreen(viewModel: LostFoundViewModel = hiltViewModel()) {
     }
 }
 
-@Composable
+/*@Composable
 private fun EmptyLostFoundPlaceholder() {
     Column(
         modifier = Modifier
@@ -225,7 +229,7 @@ private fun EmptyLostFoundPlaceholder() {
             textAlign = TextAlign.Center,
         )
     }
-}
+}*/
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

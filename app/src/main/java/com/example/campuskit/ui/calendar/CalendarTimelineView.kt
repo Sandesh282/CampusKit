@@ -30,6 +30,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.EventBusy
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -63,6 +64,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale
+import com.example.campuskit.ui.components.EmptyStateView
 
 private const val DAYS_RANGE = 365
 
@@ -365,11 +367,10 @@ private fun DateSectionHeader(date: LocalDate) {
 
 @Composable
 private fun EmptyDayRow() {
-    Text(
-        text = "No events",
-        style = MaterialTheme.typography.bodySmall,
-        color = TextTertiary,
-        modifier = Modifier.padding(start = 8.dp, top = 4.dp, bottom = 8.dp),
+    EmptyStateView(
+        icon = Icons.Outlined.EventBusy, // Make sure to import this at the top too!
+        message = "No events scheduled",
+        modifier = Modifier.padding(vertical = 16.dp)
     )
 }
 
