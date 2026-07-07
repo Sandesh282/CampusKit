@@ -23,6 +23,9 @@ import com.example.campuskit.data.lostfound.LostFoundDao
 import com.example.campuskit.data.lostfound.LostFoundEntity
 import com.example.campuskit.data.mess.YuckItemDao
 import com.example.campuskit.data.mess.YuckItemEntity
+import com.example.campuskit.data.assistant.vector.FloatArrayConverter
+import com.example.campuskit.data.assistant.vector.VectorChunkDao
+import com.example.campuskit.data.assistant.vector.VectorChunkEntity
 
 @Database(
     entities = [
@@ -36,10 +39,12 @@ import com.example.campuskit.data.mess.YuckItemEntity
         EventEntity::class,
         LostFoundEntity::class,
         CalendarEventEntity::class,
+        VectorChunkEntity::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = false,
 )
+@androidx.room.TypeConverters(FloatArrayConverter::class)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun attendanceDao(): AttendanceDao
@@ -51,6 +56,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun eventDao(): EventDao
     abstract fun lostFoundDao(): LostFoundDao
     abstract fun calendarEventDao(): CalendarEventDao
+    abstract fun vectorChunkDao(): VectorChunkDao
 
     companion object {
         @Volatile
