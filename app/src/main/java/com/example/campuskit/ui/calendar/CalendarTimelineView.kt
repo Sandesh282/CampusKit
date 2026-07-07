@@ -367,10 +367,11 @@ private fun DateSectionHeader(date: LocalDate) {
 
 @Composable
 private fun EmptyDayRow() {
-    EmptyStateView(
-        icon = Icons.Outlined.EventBusy, // Make sure to import this at the top too!
-        message = "No events scheduled",
-        modifier = Modifier.padding(vertical = 16.dp)
+    Text(
+        text = "No events",
+        style = MaterialTheme.typography.bodySmall,
+        color = TextTertiary,
+        modifier = Modifier.padding(start = 8.dp, top = 4.dp, bottom = 8.dp),
     )
 }
 

@@ -143,6 +143,7 @@ fun EventsScreen(viewModel: EventsViewModel = hiltViewModel()) {
                 item {
                     val hasSearch = searchQuery.isNotBlank()
                     EmptyStateView(
+                        modifier = Modifier.fillParentMaxSize(),
                         icon = if (hasSearch) Icons.Filled.Search else Icons.Outlined.EventBusy,
                         message = if (hasSearch) "No matching events.\nTry a different search term."
                         else "No events yet.\nEvents will appear here when they're posted."
@@ -195,37 +196,6 @@ fun EventsScreen(viewModel: EventsViewModel = hiltViewModel()) {
     }
 }
 
-/*@Composable
-private fun EmptyEventsPlaceholder(hasSearchQuery: Boolean = false) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 60.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Icon(
-            Icons.Outlined.EventBusy,
-            contentDescription = null,
-            tint = TextTertiary.copy(alpha = 0.4f),
-            modifier = Modifier.size(72.dp),
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = if (hasSearchQuery) "No matching events" else "No events yet",
-            style = MaterialTheme.typography.titleMedium,
-            color = TextSecondary,
-            fontWeight = FontWeight.SemiBold,
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = if (hasSearchQuery) "Try a different search term"
-                   else "Campus events will appear here\nwhen they're posted",
-            style = MaterialTheme.typography.bodySmall,
-            color = TextTertiary,
-            textAlign = TextAlign.Center,
-        )
-    }
-}*/
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
