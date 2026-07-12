@@ -64,7 +64,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale
-import com.example.campuskit.ui.components.EmptyStateView
 
 private const val DAYS_RANGE = 365
 
