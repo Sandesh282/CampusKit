@@ -2,6 +2,8 @@ package com.example.campuskit.di
 
 import android.content.Context
 import com.example.campuskit.data.AppDatabase
+import com.example.campuskit.data.assistant.embedding.ONNXEmbeddingService
+import com.example.campuskit.data.assistant.vector.VectorChunkDao
 import com.example.campuskit.data.attendance.AttendanceDao
 import com.example.campuskit.data.attendance.TimetableDao
 import com.example.campuskit.data.calendar.CalendarEventDao
@@ -71,5 +73,18 @@ object DataModule {
     @Provides
     fun provideCalendarEventDao(database: AppDatabase): CalendarEventDao {
         return database.calendarEventDao()
+    }
+
+    /** Provides [VectorChunkDao] for Hilt injection. */
+    @Provides
+    fun provideVectorChunkDao(database: AppDatabase): VectorChunkDao {
+        return database.vectorChunkDao()
+    }
+
+    /** Provides [ONNXEmbeddingService] — singleton so the ONNX session is loaded once. */
+    @Provides
+    @Singleton
+    fun provideOnnxEmbeddingService(@ApplicationContext context: Context): ONNXEmbeddingService {
+        return ONNXEmbeddingService(context)
     }
 }

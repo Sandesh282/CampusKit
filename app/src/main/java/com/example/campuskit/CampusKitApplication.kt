@@ -4,6 +4,10 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import com.example.campuskit.data.assistant.vector.VectorIndexingWorker
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
@@ -18,6 +22,20 @@ class CampusKitApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         createNotificationChannels()
+        enqueueVectorIndexing()
+    }
+
+    /**
+     * Kicks off vector index build in the background.
+     * KEEP policy: if indexing is already running, don't start another.
+     */
+    private fun enqueueVectorIndexing() {
+        val request = OneTimeWorkRequestBuilder<VectorIndexingWorker>().build()
+        WorkManager.getInstance(this).enqueueUniqueWork(
+            VectorIndexingWorker.WORK_NAME,
+            ExistingWorkPolicy.KEEP,
+            request,
+        )
     }
 
     private fun createNotificationChannels() {
