@@ -45,6 +45,7 @@ import com.example.campuskit.ui.theme.CardBackground
 import com.example.campuskit.ui.theme.TextPrimary
 import com.example.campuskit.ui.theme.TextSecondary
 import com.example.campuskit.ui.theme.TextTertiary
+import com.example.campuskit.ui.components.EmptyStateView
 
 @Composable
 fun NotesListScreen(
@@ -97,21 +98,10 @@ fun NotesListScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         if (notes.isEmpty()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 60.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(text = "📝", fontSize = 40.sp)
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = "No notes available yet",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = TextTertiary,
-                    textAlign = TextAlign.Center,
-                )
-            }
+            EmptyStateView(
+                icon = Icons.Outlined.Description,
+                message = "No notes available yet.\nCheck back later for study materials!"
+            )
         } else {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(12.dp),

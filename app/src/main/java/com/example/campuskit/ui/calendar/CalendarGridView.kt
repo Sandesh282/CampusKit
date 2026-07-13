@@ -26,7 +26,6 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -52,6 +51,8 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale
+import com.example.campuskit.ui.components.EmptyStateView
+import androidx.compose.material.icons.outlined.CalendarMonth
 
 @Composable
 fun CalendarGridView(viewModel: CalendarViewModel) {
@@ -89,229 +90,242 @@ fun CalendarGridView(viewModel: CalendarViewModel) {
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp, vertical = 16.dp),
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "Keep Track Of Your\nCourse Calendar",
-            style = MaterialTheme.typography.headlineLarge,
-            color = TextPrimary,
-            fontStyle = FontStyle.Italic,
-            lineHeight = 36.sp,
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Month navigation
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(CalendarGridEmpty)
-                    .clickable { viewModel.navigateMonth(-1) },
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                    contentDescription = "Previous month",
-                    tint = TextPrimary,
-                    modifier = Modifier.size(24.dp),
-                )
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(CalendarGridEmpty),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    Icons.Filled.CalendarMonth,
-                    contentDescription = null,
-                    tint = TextPrimary,
-                    modifier = Modifier.size(20.dp),
-                )
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
+        if (courses.isEmpty()) {
+            EmptyStateView(
+                icon = Icons.Outlined.CalendarMonth,
+                message = "Your calendar is empty.\nAdd a course to start tracking your schedule."
+            )
+        } else {
+            Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "${currentMonth.month.getDisplayName(TextStyle.FULL, Locale.ENGLISH)} \\ ${currentMonth.year}",
-                style = MaterialTheme.typography.titleMedium,
+                text = "Keep Track Of Your\nCourse Calendar",
+                style = MaterialTheme.typography.headlineLarge,
                 color = TextPrimary,
-                fontWeight = FontWeight.SemiBold,
+                fontStyle = FontStyle.Italic,
+                lineHeight = 36.sp,
             )
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(CalendarGridEmpty)
-                    .clickable { viewModel.navigateMonth(1) },
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = "Next month",
-                    tint = TextPrimary,
-                    modifier = Modifier.size(24.dp),
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        // Day-of-week header
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            val dayLabels = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-            dayLabels.forEach { day ->
-                Text(
-                    text = day,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = TextSecondary,
-                    modifier = Modifier.weight(1f),
-                    fontWeight = FontWeight.Medium,
-                )
-            }
-            Spacer(modifier = Modifier.width(48.dp))
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Calendar grid with weekly percentage
-        val totalCells = startOffset + daysInMonth
-        val weeks = (totalCells + 6) / 7
-
-        for (week in 0 until weeks) {
+            // Month navigation
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth(),
             ) {
-                for (dayInWeek in 0 until 7) {
-                    val cellIndex = week * 7 + dayInWeek
-                    val dayNumber = cellIndex - startOffset + 1
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(CircleShape)
+                        .background(CalendarGridEmpty)
+                        .clickable { viewModel.navigateMonth(-1) },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = "Previous month",
+                        tint = TextPrimary,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
 
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .aspectRatio(1f)
-                            .padding(2.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        if (dayNumber in 1..daysInMonth) {
-                            val date = currentMonth.atDay(dayNumber)
-                            val courseColor = allAttendedDates[date]
-                            val isSelected = date == selectedDate
+                Spacer(modifier = Modifier.width(8.dp))
 
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clip(CircleShape)
-                                    .then(
-                                        if (courseColor != null) {
-                                            Modifier.background(courseColor)
-                                        } else {
-                                            Modifier.border(
-                                                width = 1.5.dp,
-                                                color = CalendarGridEmpty,
-                                                shape = CircleShape,
-                                            )
-                                        },
-                                    )
-                                    .then(
-                                        if (isSelected) {
-                                            Modifier.border(
-                                                width = 2.dp,
-                                                color = TextPrimary,
-                                                shape = CircleShape,
-                                            )
-                                        } else {
-                                            Modifier
-                                        },
-                                    )
-                                    .clickable { viewModel.selectDate(date) },
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                if (courseColor != null) {
-                                    Text(
-                                        text = "$dayNumber",
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = Black,
-                                        fontWeight = FontWeight.Bold,
-                                    )
-                                } else {
-                                    Text(
-                                        text = "×",
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = TextTertiary,
-                                    )
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(CircleShape)
+                        .background(CalendarGridEmpty),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        Icons.Filled.CalendarMonth,
+                        contentDescription = null,
+                        tint = TextPrimary,
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Text(
+                    text = "${
+                        currentMonth.month.getDisplayName(
+                            TextStyle.FULL,
+                            Locale.ENGLISH
+                        )
+                    } \\ ${currentMonth.year}",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = TextPrimary,
+                    fontWeight = FontWeight.SemiBold,
+                )
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(CircleShape)
+                        .background(CalendarGridEmpty)
+                        .clickable { viewModel.navigateMonth(1) },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = "Next month",
+                        tint = TextPrimary,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Day-of-week header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                val dayLabels = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+                dayLabels.forEach { day ->
+                    Text(
+                        text = day,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = TextSecondary,
+                        modifier = Modifier.weight(1f),
+                        fontWeight = FontWeight.Medium,
+                    )
+                }
+                Spacer(modifier = Modifier.width(48.dp))
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Calendar grid with weekly percentage
+            val totalCells = startOffset + daysInMonth
+            val weeks = (totalCells + 6) / 7
+
+            for (week in 0 until weeks) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    for (dayInWeek in 0 until 7) {
+                        val cellIndex = week * 7 + dayInWeek
+                        val dayNumber = cellIndex - startOffset + 1
+
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .aspectRatio(1f)
+                                .padding(2.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            if (dayNumber in 1..daysInMonth) {
+                                val date = currentMonth.atDay(dayNumber)
+                                val courseColor = allAttendedDates[date]
+                                val isSelected = date == selectedDate
+
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(CircleShape)
+                                        .then(
+                                            if (courseColor != null) {
+                                                Modifier.background(courseColor)
+                                            } else {
+                                                Modifier.border(
+                                                    width = 1.5.dp,
+                                                    color = CalendarGridEmpty,
+                                                    shape = CircleShape,
+                                                )
+                                            },
+                                        )
+                                        .then(
+                                            if (isSelected) {
+                                                Modifier.border(
+                                                    width = 2.dp,
+                                                    color = TextPrimary,
+                                                    shape = CircleShape,
+                                                )
+                                            } else {
+                                                Modifier
+                                            },
+                                        )
+                                        .clickable { viewModel.selectDate(date) },
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    if (courseColor != null) {
+                                        Text(
+                                            text = "$dayNumber",
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = Black,
+                                            fontWeight = FontWeight.Bold,
+                                        )
+                                    } else {
+                                        Text(
+                                            text = "×",
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = TextTertiary,
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                // Weekly percentage
-                val weekStart = week * 7 - startOffset + 1
-                val weekEnd = weekStart + 6
-                val daysInWeek = (weekStart.coerceAtLeast(1)..weekEnd.coerceAtMost(daysInMonth)).toList()
-                val attendedInWeek = daysInWeek.count { day ->
-                    allAttendedDates.containsKey(currentMonth.atDay(day))
-                }
-                val weekPercentage = if (daysInWeek.isNotEmpty()) {
-                    (attendedInWeek * 100) / daysInWeek.size
-                } else {
-                    0
-                }
+                    // Weekly percentage
+                    val weekStart = week * 7 - startOffset + 1
+                    val weekEnd = weekStart + 6
+                    val daysInWeek =
+                        (weekStart.coerceAtLeast(1)..weekEnd.coerceAtMost(daysInMonth)).toList()
+                    val attendedInWeek = daysInWeek.count { day ->
+                        allAttendedDates.containsKey(currentMonth.atDay(day))
+                    }
+                    val weekPercentage = if (daysInWeek.isNotEmpty()) {
+                        (attendedInWeek * 100) / daysInWeek.size
+                    } else {
+                        0
+                    }
 
-                Text(
-                    text = "$weekPercentage%",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = TextSecondary,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.width(48.dp),
-                )
+                    Text(
+                        text = "$weekPercentage%",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = TextSecondary,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.width(48.dp),
+                    )
+                }
             }
-        }
 
-        Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-        // Course legend
-        courses.forEach { course ->
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(vertical = 6.dp),
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(14.dp)
-                        .clip(CircleShape)
-                        .background(course.color),
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = course.name,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = TextPrimary,
-                    fontWeight = FontWeight.Normal,
-                )
+            // Course legend
+            courses.forEach { course ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(vertical = 6.dp),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(14.dp)
+                            .clip(CircleShape)
+                            .background(course.color),
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = course.name,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TextPrimary,
+                        fontWeight = FontWeight.Normal,
+                    )
+                }
             }
-        }
 
-        Spacer(modifier = Modifier.height(100.dp))
+            Spacer(modifier = Modifier.height(100.dp))
+        }
     }
 }

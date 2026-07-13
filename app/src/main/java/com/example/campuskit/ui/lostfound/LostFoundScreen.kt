@@ -71,6 +71,7 @@ import com.example.campuskit.ui.theme.SurfaceVariant
 import com.example.campuskit.ui.theme.TextPrimary
 import com.example.campuskit.ui.theme.TextSecondary
 import com.example.campuskit.ui.theme.TextTertiary
+import com.example.campuskit.ui.components.EmptyStateView
 
 @Composable
 fun LostFoundScreen(viewModel: LostFoundViewModel = hiltViewModel()) {
@@ -118,7 +119,11 @@ fun LostFoundScreen(viewModel: LostFoundViewModel = hiltViewModel()) {
 
             if (items.isEmpty()) {
                 item {
-                    EmptyLostFoundPlaceholder()
+                    EmptyStateView(
+                        modifier = Modifier.fillParentMaxSize(),
+                        icon = Icons.Outlined.Inventory2,
+                        message = "Nothing here yet.\nFound something on campus? Tap + to help someone find it."
+                    )
                 }
             } else {
                 itemsIndexed(items, key = { _, item -> item.id }) { index, item ->
@@ -196,36 +201,6 @@ fun LostFoundScreen(viewModel: LostFoundViewModel = hiltViewModel()) {
     }
 }
 
-@Composable
-private fun EmptyLostFoundPlaceholder() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 60.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Icon(
-            Icons.Outlined.Inventory2,
-            contentDescription = null,
-            tint = TextTertiary.copy(alpha = 0.4f),
-            modifier = Modifier.size(72.dp),
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Nothing here yet",
-            style = MaterialTheme.typography.titleMedium,
-            color = TextSecondary,
-            fontWeight = FontWeight.SemiBold,
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = "Found something on campus?\nTap + to help someone find it",
-            style = MaterialTheme.typography.bodySmall,
-            color = TextTertiary,
-            textAlign = TextAlign.Center,
-        )
-    }
-}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
