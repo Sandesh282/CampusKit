@@ -12,6 +12,7 @@
 [![DI](https://img.shields.io/badge/DI-Hilt-FF6F00?logo=google&logoColor=white)](https://dagger.dev/hilt/)
 [![Room](https://img.shields.io/badge/Persistence-Room-003B57)](https://developer.android.com/training/data-storage/room)
 [![API](https://img.shields.io/badge/API-Retrofit%20%2B%20Moshi-blue)](https://square.github.io/retrofit/)
+[![RAG](https://img.shields.io/badge/AI-RAG%20%2B%20Vector%20DB-blueviolet)](https://github.com/Sandesh282/CampusKit)
 [![Min SDK](https://img.shields.io/badge/Min%20SDK-26-brightgreen)](https://developer.android.com)
 [![Target SDK](https://img.shields.io/badge/Target%20SDK-36-brightgreen)](https://developer.android.com)
 
@@ -83,6 +84,15 @@ Every college student juggles a chaotic mix of timetables, attendance spreadshee
 - **Multi-source aggregation** — content from Medium, GitHub, Dev.to, and more
 - **Category-based browsing** — discover content that matters to you
 
+### Campus AI Assistant
+- **Natural language queries** — ask anything about your campus life in plain English
+- **On-device RAG pipeline** — user query is embedded on-device using `all-MiniLM-L6-v2` via ONNX Runtime, then matched against a local vector store of all campus data via cosine similarity
+- **Room-backed vector store** — 384-dimensional float embeddings stored as BLOBs in a `vector_chunks` table; cosine similarity search runs entirely on-device in Kotlin
+- **Semantic retrieval** — finds relevant data by *meaning*, not keywords (e.g. "what should I eat before my hardest class" retrieves both mess menu and attendance chunks)
+- **Grounded Gemini responses** — top-k retrieved chunks are injected as context into the Gemini prompt, eliminating hallucinations
+- **Background indexing** — `VectorIndexingWorker` re-indexes all campus data at startup via WorkManager
+- **Streaming UI** — Gemini response streams token-by-token via Kotlin Flow for a real-time chat feel
+
 ### Onboarding Experience
 - **Beautiful multi-page onboarding flow** with animated transitions
 - **Personalization** — set your name, program, and semester during onboarding
@@ -99,17 +109,35 @@ CampusKit is engineered with a **Clean Architecture** approach using the **MVVM*
 ┌───────────────────────────────────────────────────┐
 │                    UI Layer                       │
 │  Jetpack Compose Screens + ViewModels             │
-│  (HomeScreen, MessScreen, EventsScreen, ...)      │
+│  (HomeScreen, MessScreen, AssistantScreen, ...)   │
 ├───────────────────────────────────────────────────┤
 │                 Domain Layer                      │
 │  Use Cases + Repository Interfaces                │
-│  (CalculateSafeBunksUseCase, FilterEventsUseCase) │
+│  (CalculateSafeBunksUseCase, AskAssistantUseCase) │
 ├───────────────────────────────────────────────────┤
 │                  Data Layer                       │
 │  Room DAOs + Entities + Repositories              │
 │  Retrofit API + DTOs + DataStore Preferences      │
-│  (AttendanceRepo, AcademicRepo, MessRepo, ...)    │
+│  ONNX Runtime (embedding) + Vector Store (RAG)    │
 └───────────────────────────────────────────────────┘
+```
+
+### RAG Pipeline
+
+```
+User Query
+    │
+    ▼
+[ONNXEmbeddingService]   ← on-device, all-MiniLM-L6-v2 (~86MB)
+    │  embed query → FloatArray(384)
+    ▼
+[VectorStore (Room)]     ← dot product over vector_chunks table
+    │  top-5 semantically similar chunks
+    ▼
+[GeminiAssistantService] ← cloud generation with grounded context
+    │  streamed token response
+    ▼
+ AssistantViewModel / UI
 ```
 
 ### Key Architectural Decisions
@@ -117,13 +145,15 @@ CampusKit is engineered with a **Clean Architecture** approach using the **MVVM*
 | Decision | Rationale |
 |---|---|
 | **Hilt DI** | Compile-time verified dependency injection with minimal boilerplate; modules clearly separate data providers from repository bindings |
-| **Room Database** | Single `AppDatabase` managing 10 entity tables with type-safe DAOs; supports reactive `Flow`-based queries |
+| **Room Database** | Single `AppDatabase` managing 11 entity tables with type-safe DAOs; supports reactive `Flow`-based queries |
 | **Kotlin Flows + StateFlow** | Fully reactive data pipeline from Room to Repository to ViewModel to Compose UI; no LiveData anywhere |
 | **DataStore Preferences** | Modern, coroutine-native preference storage for user settings (program, semester, student name) |
 | **Retrofit + Moshi** | Type-safe HTTP client with Moshi for JSON parsing; KSP-powered code generation for adapters |
 | **Offline-first with TTL Sync** | Serve cached data immediately, sync in background only when stale (24-hour TTL tracked via `SyncMetadataEntity`) |
 | **Sealed Classes for Resources** | Polymorphic `Resource` model (PastYearPaper, Note) enables type-safe resource handling |
 | **Use Cases** | Stateless domain logic extracted into injectable use cases for testability and reuse |
+| **On-device Vector Embeddings** | `all-MiniLM-L6-v2` runs via ONNX Runtime; 384-dim unit vectors stored as BLOBs in Room; cosine similarity = dot product, no external vector DB needed at this data scale |
+| **RAG over keyword routing** | Semantic retrieval handles fuzzy, multi-topic queries that keyword matching misses; context is grounded in the user's actual Room data |
 
 ## Tech Stack
 
@@ -133,7 +163,10 @@ CampusKit is engineered with a **Clean Architecture** approach using the **MVVM*
 | **UI Framework** | Jetpack Compose with Material 3 |
 | **Architecture** | MVVM + Clean Architecture |
 | **Dependency Injection** | Hilt (Dagger) |
-| **Local Database** | Room (10 entities, 9 DAOs) |
+| **Local Database** | Room (11 entities, 10 DAOs) |
+| **Vector DB** | Room-backed `vector_chunks` table with `FloatArray` BLOB embeddings |
+| **On-device ML** | ONNX Runtime + `all-MiniLM-L6-v2` (sentence embeddings, 384-dim) |
+| **LLM / Generation** | Gemini API (gemini-flash) with RAG-grounded context |
 | **Preferences** | DataStore Preferences |
 | **Networking** | Retrofit 2 + Moshi |
 | **Async** | Kotlin Coroutines + Flow |
@@ -182,11 +215,23 @@ CampusKit maintains a comprehensive test suite across both unit and instrumented
 ```
 CampusKit/
 ├── app/src/main/java/com/example/campuskit/
-│   ├── CampusKitApplication.kt          # Hilt app + notification channels
+│   ├── CampusKitApplication.kt          # Hilt app + notification channels + vector index enqueue
 │   ├── MainActivity.kt                  # Single-activity entry point with onboarding flow
 │   │
 │   ├── data/                            # Data Layer
-│   │   ├── AppDatabase.kt               # Room database (10 entities, v5)
+│   │   ├── AppDatabase.kt               # Room database (11 entities, v6)
+│   │   ├── assistant/
+│   │   │   ├── AssistantContextBuilder.kt   # RAG retrieval: embed query → cosine search → top-k chunks
+│   │   │   ├── GeminiAssistantService.kt    # Gemini API wrapper, streaming Flow<String>
+│   │   │   ├── embedding/
+│   │   │   │   ├── BertTokenizer.kt          # WordPiece tokenizer (vocab.txt from assets)
+│   │   │   │   └── ONNXEmbeddingService.kt  # ONNX Runtime inference → 384-dim unit vector
+│   │   │   └── vector/
+│   │   │       ├── VectorChunkEntity.kt     # Room entity: text + FloatArray(384) embedding
+│   │   │       ├── VectorChunkDao.kt        # upsert / getAll / getBySource / deleteBySource
+│   │   │       ├── FloatArrayConverter.kt   # TypeConverter: FloatArray ↔ ByteArray BLOB
+│   │   │       ├── VectorStore.kt           # Index all campus data + dot product search
+│   │   │       └── VectorIndexingWorker.kt  # HiltWorker: runs indexAll() in background
 │   │   ├── academic/
 │   │   │   ├── SubjectCatalog.kt         # Static catalog: 4 programs x 8 semesters
 │   │   │   ├── local/                    # Room entities + DAOs (Subject, Offering, Resource, SyncMetadata)
@@ -259,7 +304,6 @@ cd CampusKit
 
 ## Future Additions
 
-- [ ] **On-device RAG Pipeline** — Embedded vector database powering an AI campus assistant with LLM inference directly on the edge for zero-latency, network-independent responses
 - [ ] **Timetable Auto-Sync** — Automatic class schedule import and smart attendance reminders
 - [ ] **Multi-Campus Support** — Configurable campus profiles for different institutions
 - [ ] **Collaborative Lost and Found** — Real-time community board with image uploads and chat
