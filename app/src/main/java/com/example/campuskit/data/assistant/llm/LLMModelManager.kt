@@ -51,12 +51,19 @@ class LLMModelManager @Inject constructor(
             return
         }
         _downloadState.value = ModelDownloadState.Downloading(0)
-        val request = OneTimeWorkRequestBuilder<ModelDownloadWorker>().build()
+        val constraints = androidx.work.Constraints.Builder()
+            .setRequiredNetworkType(androidx.work.NetworkType.UNMETERED) // Wi-Fi only
+            .build()
+        val request = OneTimeWorkRequestBuilder<ModelDownloadWorker>()
+            .setConstraints(constraints)
+            .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .build()
         WorkManager.getInstance(context).enqueueUniqueWork(
             ModelDownloadWorker.WORK_NAME,
             ExistingWorkPolicy.KEEP,
             request,
         )
+
         // Observe WorkManager state to update our flow
         WorkManager.getInstance(context)
             .getWorkInfosForUniqueWorkLiveData(ModelDownloadWorker.WORK_NAME)

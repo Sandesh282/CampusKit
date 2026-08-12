@@ -32,8 +32,11 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -51,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.campuskit.data.assistant.llm.ModelDownloadState
 import com.example.campuskit.ui.theme.AccentBlue
 import com.example.campuskit.ui.theme.AccentPurple
 import com.example.campuskit.ui.theme.Black
@@ -73,6 +77,7 @@ fun AssistantScreen(
         uiState = uiState,
         onInputChanged = viewModel::onInputChanged,
         onSend = viewModel::sendMessage,
+        onDownloadModel = viewModel::onDownloadModelClicked,
     )
 }
 
@@ -83,6 +88,7 @@ fun AssistantContent(
     uiState: AssistantUiState,
     onInputChanged: (String) -> Unit,
     onSend: () -> Unit,
+    onDownloadModel: () -> Unit = {},
 ) {
     val listState = rememberLazyListState()
 
@@ -124,12 +130,20 @@ fun AssistantContent(
                     color = TextPrimary,
                 )
                 Text(
-                    text = "Powered by Gemini",
+                    text = if (uiState.modelDownloadState is ModelDownloadState.Ready)
+                        "On-device · Offline" else "Powered by Gemini",
                     fontSize = 10.sp,
-                    color = TextTertiary,
+                    color = if (uiState.modelDownloadState is ModelDownloadState.Ready)
+                        AccentPurple else TextTertiary,
                 )
             }
         }
+
+        // ── Model download banner ──────────────────────────────────────────────
+        ModelDownloadBanner(
+            state = uiState.modelDownloadState,
+            onDownload = onDownloadModel,
+        )
 
         if (uiState.messages.isEmpty()) {
             WelcomePrompt(modifier = Modifier.weight(1f))
@@ -161,6 +175,106 @@ fun AssistantContent(
             onSend = onSend,
             isLoading = uiState.isLoading,
         )
+    }
+}
+
+// ── Model download banner ──────────────────────────────────────────────────────
+
+@Composable
+private fun ModelDownloadBanner(
+    state: ModelDownloadState,
+    onDownload: () -> Unit,
+) {
+    when (state) {
+        is ModelDownloadState.NotDownloaded -> {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(AccentPurple.copy(alpha = 0.10f))
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "Enable On-Device AI",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = AccentPurple,
+                    )
+                    Text(
+                        "Download Gemma (~1.4 GB) to run fully offline",
+                        fontSize = 11.sp,
+                        color = TextSecondary,
+                    )
+                }
+                Spacer(Modifier.width(12.dp))
+                Button(
+                    onClick = onDownload,
+                    colors = ButtonDefaults.buttonColors(containerColor = AccentPurple),
+                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
+                ) {
+                    Text("Download", fontSize = 12.sp, color = Color.White)
+                }
+            }
+        }
+        is ModelDownloadState.Downloading -> {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(AccentPurple.copy(alpha = 0.10f))
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        "Downloading Gemma model…",
+                        fontSize = 12.sp,
+                        color = AccentPurple,
+                        fontWeight = FontWeight.Medium,
+                    )
+                    Text(
+                        "${state.progressPercent}%",
+                        fontSize = 12.sp,
+                        color = TextSecondary,
+                    )
+                }
+                Spacer(Modifier.height(6.dp))
+                LinearProgressIndicator(
+                    progress = { state.progressPercent / 100f },
+                    modifier = Modifier.fillMaxWidth().clip(CircleShape),
+                    color = AccentPurple,
+                    trackColor = AccentPurple.copy(alpha = 0.2f),
+                )
+            }
+        }
+        is ModelDownloadState.Failed -> {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.Red.copy(alpha = 0.10f))
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    "Download failed. Tap to retry.",
+                    fontSize = 12.sp,
+                    color = Color.Red.copy(alpha = 0.8f),
+                    modifier = Modifier.weight(1f),
+                )
+                Button(
+                    onClick = onDownload,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red.copy(alpha = 0.8f)),
+                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
+                ) {
+                    Text("Retry", fontSize = 12.sp, color = Color.White)
+                }
+            }
+        }
+        is ModelDownloadState.Ready -> Unit // nothing — subtitle updated to "On-device · Offline"
     }
 }
 

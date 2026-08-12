@@ -96,9 +96,11 @@ class DefaultAcademicRepository @Inject constructor(
                         semester = semester,
                         isElective = false // Simplified
                     )
-                }
+                } // end forEach
+
                 
                 // Clear old resources for this semester mapping
+
                 resourceDao.deleteResourcesForSemester(program.name, semester)
                 
                 // Upsert Subjects & Offerings
